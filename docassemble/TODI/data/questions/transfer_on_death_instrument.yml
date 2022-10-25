@@ -1,0 +1,1054 @@
+metadata:
+  title: Transfer on death instrument - TODI
+  short title: TODI
+  comment:  This program helps you prepare a Transfer On Death Instrument for your property located in Illinois. 
+  authors:
+    - Vivian McNaughton
+    - Matt Newsted
+---
+include:
+  - docassemble.AssemblyLine:assembly_line.yml
+  - docassemble.ALToolbox:phone-number-validation.yml
+  - docassemble.ILAO:ilao-interview-framework.yml
+  - docassemble.ILAO:shared-basic-questions.yml
+---
+objects:
+  - user: ALIndividual
+  - todi_property: ALIndividual
+  - ownership_types: ALPeopleList
+  - beneficiaries: ALPeopleList.using(there_are_any=True)
+  - beneficiaries[i].successor_beneficiary: ALIndividual
+  - witnesses: ALPeopleList.using(there_are_any=True)
+  - court_list: ALCourtLoader.using(file_name='docassemble.ILAO:data/sources/il_courts.xlsx')
+---
+code: |
+  ilao_easy_form_title = "Transfer on death instrument - TODI"
+  ilao_easy_form_url = "https://www.illinoislegalaid.org/legal-information/transfer-death-instrument-or-todi"
+  github_user = 'IllinoisLegalAidOnline'
+  github_repo_name = 'docassemble-TODI'
+---
+sections:
+  - review_answers: Review your answers
+---
+sections:
+  - section_intro: Start
+  - section_user: About you
+  - section_property: Property
+  - section_beneficiaries: Beneficiaries
+  - section_witnesses: Witnesses
+  - section_download: Download
+---
+# interview order block
+mandatory: True
+code: |
+  nav.set_section('section_intro')
+  sees_nav_bar
+  set_progress(5)
+  first_pass = True
+  running_total = 0
+  how_to_use
+  accept_terms
+  todi_requirements
+  if illinois_property == False:
+    not_in_illinois
+  nav.set_section('section_user')
+  user.name.first
+  user.address.address
+  if user.include_phone == True:
+    user.phone_number
+  if user.include_email == True:
+    user.email_address
+  if user.marital_status == "Married":
+    married_note
+  nav.set_section('section_property')
+  if sign_known == True:
+    sign_date
+  todi_property.address.address
+  trial_court
+  todi_property.pin
+  todi_property.description
+  if other_owners_check == "multiple":
+    if user.marital_status == "Married":
+      #The clear function is included because without it the list will append a second time if the user returns to shared_owners_type question using the back button.
+      ownership_types.clear()
+      ownership_types.append('Tenancy in common', 'Joint tenancy', 'Tenancy by the entirety', 'I do not know')
+      ownership_types.gathered = True
+    if user.marital_status != "Married":
+      #The clear function is included because without it the list will append a second time if the user returns to shared_owners_type question using the back button.
+      ownership_types.clear()
+      ownership_types.append('Tenancy in common', 'Joint tenancy', 'I do not know')
+      ownership_types.gathered = True
+    if shared_owners_type == "Tenancy in common":
+      common_explanation
+    if shared_owners_type == "Joint tenancy":
+      joint_explanation
+    if shared_owners_type == "Tenancy by the entirety":
+      entirety_explanation
+    if shared_owners_type == "I do not know":
+      unknown_kickout
+  nav.set_section('section_beneficiaries')
+  beneficiaries.there_are_any = True
+  for person in beneficiaries:
+    person.name.first
+    person.address.address
+    person.relationship
+    if person.benefits == True:
+      benefits_explainer
+    if person.successor_tf == True:
+      person.successor_beneficiary.name.first
+      person.successor_beneficiary.address.city
+      person.successor_beneficiary.relationship
+    elif person.relationship == "Child":
+      child_notice
+  if beneficiaries.number() != 1:
+    if other_owners_check == "multiple" and shared_owners_type == "Tenancy in common":
+      alt_tenancy_intro
+      tenancy_type = "Tenants in common"
+    if tenancy_type == "Tenants in common":
+      even_split
+    if tenancy_type == "Tenants in common" and even_split == False:
+      for person in beneficiaries:
+        person.percent_share
+        running_total = running_total + person.percent_share
+      if running_total != 100 and tenancy_type == "Tenants in common":
+        if other_owners_check == "multiple" and shared_owners_type == "Tenancy in common":
+          percent_kickout
+        else:
+          percent_error
+          tenancy_type = "Joint tenants"
+    else:
+      for person in beneficiaries:
+        person.percent_share = 100 / beneficiaries.number_gathered()
+  else:
+    if beneficiaries[0].relationship != "Child":
+      if beneficiaries[0].successor_tf == False:
+        probate_warning
+  nav.set_section('section_witnesses')
+  if witnesses[0].known == True:
+    witnesses[0].name.first
+    if witnesses[0].location_known == True:
+      witnesses[0].address.address
+    if witnesses[1].known == True:
+      witnesses[1].name.first
+      if witnesses[1].location_known == True:
+        witnesses[1].address.address
+  witnesses.gathered = True
+  nav.set_section('section_download')
+  get_docs_screen
+---
+id: welcome
+question: |
+  Transfer on death instrument - TODI
+subquestion: |
+  Welcome to Illinois Legal Aid Online's **Transfer on death instrument - TODI** Easy Form.
+
+  This program helps you prepare a Transfer On Death Instrument (TODI) for your property located in Illinois. 
+  
+  A TODI lets you to transfer real estate to your loved ones without including it in your will. This means your loved ones can avoid having to go to court to divide up your property after your death.
+  
+  The form you create can only be used in Illinois.
+field: sees_nav_bar
+---
+id: instructions
+continue button field: how_to_use
+question: |
+  Instructions
+subquestion: |
+  Set aside 10 to 20 minutes to finish this program. You can log in and save your work to return to later. 
+
+  After you download your form, you will need to sign it in front of 2 witnesses and a notary public, record the TODI with your county's Recorder of Deeds, and give copies to your beneficiaries.
+  
+  ${ collapse_template(help_example) }  
+
+  Click on **{green words}** to learn what they mean. Some questions have a question mark in a circle ${ fa_icon("question-circle", color_css="#0DCAF0" ) } that also gives help.
+---
+template: help_example
+
+subject: |
+
+  **You can expand sections like this to show more information.**
+
+content: |  
+
+  This is an example of help. Click again to hide.
+---
+id: accept terms
+question: |
+  Terms of use
+subquestion: |
+  This program does not provide legal advice. It does not take the place of advice from a lawyer.
+
+  Using this program does not create an attorney-client relationship between you and Illinois Legal Aid Online or its employees.
+
+  ${ collapse_template(get_legal_help) }  
+
+fields:
+  - To continue, you must accept the [**terms of use**](https://www.illinoislegalaid.org/about/terms-of-use).: accept
+    datatype: checkboxes
+    none of the above: False
+    minlength: 1
+    choices:
+      - I accept the terms of use.
+    validation messages:
+      minlength: |
+        You cannot continue unless you agree to the terms of use.
+continue button field: accept_terms
+---
+template: get_legal_help
+subject: |
+  **What if I need legal advice?**
+content: |  
+  If you have questions or concerns about your legal problem and want legal advice you should talk to a lawyer.
+ 
+  Use [**Get Legal Help**](https://www.illinoislegalaid.org/get-legal-help) to find free or low-cost legal services in your area.
+---
+id: todi requirements
+continue button field: todi_requirements
+question: |
+  Information about TODIs
+subquestion: |
+  A TODI can be used to transfer any type of real property. This means a house, a condo, a building, or a parcel of land.
+  
+  To complete this program, you will need to know: 
+
+  * Your Property Identification Number ("PIN"), which should be on your deed and other documents recorded against the property. You can obtain the PIN from your County Clerk's Office, Assessor's Office, and sometimes at your county's website.
+
+  * The legal description of the property. You can find this in the property deed or other documents recorded against the property. If you do not have these, you can find them at the office of County Recorder of Deeds or their website. For example, in Cook County, you would go to the Recorder of Deeds website and search for your deed using your PIN. You could then view an image of the deed which contains the legal description. 
+---
+id: illinois property
+question: |
+  Is the property you want to include in the TODI located in Illinois? 
+fields:
+  - no label: illinois_property
+    datatype: yesnoradio
+---
+id: not in illinois
+event: not_in_illinois
+question: |
+  Sorry
+subquestion: |
+  You can only use this program for property located in Illinois.
+buttons:
+  - Exit: exit
+  - Restart: restart
+---
+id: user name
+question: |
+  What is your name?
+fields:
+  - First: user.name.first
+  - Middle: user.name.middle
+    required: False
+  - Last: user.name.last
+---
+id: user address
+question: |
+  What is your mailing address?
+subquestion: |
+  This does not have to be the address of the property you're transferring.
+fields:
+  - Street address: user.address.address
+    address autocomplete: True
+  - Address line 2: user.address.unit
+    required: False
+  - City: user.address.city
+  - County: user.address.county
+  - State: user.address.state
+    code: |
+      states_list() 
+  - ZIP code: user.address.zip
+---
+id: user phone check
+question: |
+  Do you want to include your phone number in the TODI?
+fields:
+  - no label: user.include_phone
+    datatype: yesnoradio
+---
+id: user phone number
+question: |
+  What is your phone number?
+fields:
+  - Phone number: user.phone_number
+    datatype: al_international_phone
+    required: False
+---
+id: user email check
+question: |
+  Do you want to include your email address in the TODI?
+fields:
+  - no label: user.include_email
+    datatype: yesnoradio
+---
+id: user email address
+question: |
+  What is your email address?
+fields: 
+  - Email: user.email_address
+    datatype: email
+---
+id: user marital status
+question: |
+  What is your marital status?
+field: user.marital_status
+choices:
+  - Single
+  - Married
+  - Legally separated by a judge
+  - Divorced
+  - Widowed
+---
+id: married note
+continue button field: married_note
+question: |
+  If your spouse outlives you, they may be able to stop your TODI. 
+subquestion: |
+  If your spouse outlives you they may be able to stop your TODI, even if you have been separated for a long time. If they stop the TODI, your spouse will receive a share of the property. 
+  Learn more about:
+  
+  * [What happens when I die without a will?](https://www.illinoislegalaid.org/legal-information/what-happens-when-i-die-without-will/)
+  * [Giving someone your house when you die](https://www.illinoislegalaid.org/legal-information/giving-someone-your-house-when-you-die), and 
+  * [A will as a legal document to explain my wishes after I die](https://www.illinoislegalaid.org/legal-information/will-legal-document-explain-my-wishes-after-i-die).
+---
+id: property address
+question: |
+  What is the address of the property you want to include in the TODI?
+fields:
+  - Street address: todi_property.address.address
+    address autocomplete: True
+  - Address line 2: todi_property.address.unit
+    required: False
+  - City: todi_property.address.city
+  - State: todi_property.address.state
+    code: |
+      states_list() 
+  - ZIP code: todi_property.address.zip
+---
+id: trial court county
+continue button field: property_county
+question: |
+  In which county is the property located?
+fields:
+  - no label: trial_court_index
+    code: |
+      court_county_lookup()
+---   
+code: |
+  def court_county_lookup():
+    all_court_counties = court_list._load_courts()['address_county'].items()
+    filtered_courts = [(-1, "Cook")]
+    for court in all_court_counties:
+      if court[1] != "Cook":
+        filtered_courts.append(court)
+    return sorted( filtered_courts, key=lambda y: y[1])
+---
+depends on:
+  - trial_court_index
+code: |
+  if trial_court_index == "-1":
+    trial_court = court_list.as_court('trial_court', 15)
+  else:
+    trial_court = court_list.as_court('trial_court', trial_court_index)
+---
+id: property pin
+question: |
+  What is the Property Identification Number ("PIN") for this property? 
+subquestion: |
+  You can find your PIN at your County Clerk's Office or Assessor's Office, and sometimes at your county's website. If your property is in one of the counties below, click the link to look up your PIN: 
+
+  * [Cook County](http://www.cookcountypropertyinfo.com/)
+  * [Lake County](http://www.lakecountyil.gov/154/Chief-County-Assessment-Office)
+  * [DuPage County](http://www.dupageco.org/PropertyInfo/PropertyLookup.aspx)
+  * [McHenry County](http://www.mchenrycountygis.org/Athena/#)
+
+  
+  The format of a PIN is 12-12-123-123-1234.
+fields:
+  - PIN: todi_property.pin
+---
+id: property description
+question: |
+  What is the legal description of the property?
+subquestion: |
+  You can find the legal description on the property deed or other documents recorded against the property. If you do not have these, you can find them at the office of County Recorder of Deeds or their website. For example, in Cook County, you would go to the Recorder of Deeds website and search for your deed using your PIN. You could then view an image of the deed which contains the legal description. 
+
+  Be very careful in writing the property description. You should copy the legal description exactly. You may wish to compare the deed to other documents (such as a mortgage or lien) to see if the descriptions are the same. If your property is in one of the counties listed below, you can click to visit the county recorder's website to look up your deed. Keep in mind that you may need to register for an account and log in to view the deed and any other documents recorded against the property:
+
+  * [Cook County](http://cookrecorder.com/"»Cook County Recorder of Deeds)
+  * [Lake County](https://www.lakecountyil.gov/258/Recorder-of-Deeds)
+  * [DuPage County](https://www.dupageco.org/Recorder/31274/)
+  * [McHenry County](https://www.co.mchenry.il.us/county-government/departments-a-i/county-recorder)
+
+  If your property is in a different county, use a search engine like Google to find your county's Recorder of Deeds website and see if you can look up your deed for free online.
+fields:
+  - Description: todi_property.description
+---
+id: other owners check
+question: |
+  Do you own this property by yourself, or do you own it with someone else?
+field: other_owners_check
+choices:
+  - I am the only owner.: sole
+  - I share this property with someone else.: multiple
+---
+id: shared owners type
+question: |
+  What type of ownership do you have?
+subquestion: |
+  There are a few different ways multiple people can own a property. Your deed or conveyance document may have this informaton.
+field: shared_owners_type
+choices:
+  code: |
+    ownership_types
+---
+id: tenant in common explanation
+continue button field: common_explanation
+question: |
+  As you are a tenant in common, you and the other owner(s) must make separate TODIs. Your TODI will transfer your share of the property to your beneficiaries.
+---
+id: joint tenant explanation
+continue button field: joint_explanation
+question: |
+  As you are a joint owner, you and the other owner(s) could file a TODI together. However, this program can only make a TODI for a single owner.
+subquestion: |
+  You and the other owner(s) can each file your own TODIs, but only the TODI of the owner who passes away last would take effect.
+---
+id: tenant entirety explanation
+continue button field: entirety_explanation
+question: |
+  This program can only make a TODI for a single owner.
+subquestion: |
+  As you and your spouse are tenants in the entirety, you could file a TODI together if you both agree who should get the home after you both pass away. However, this program can only make a TODI for a single owner.
+
+  If you and your spouse do not agree about who would get the home after you both pass away, you can each file your own TODIs. Only the TODI of the owner who passes away last would take effect.
+---
+id: unknown kickout
+event: unknown_kickout
+question: |
+  Sorry
+subquestion: |
+  You should not use this program if you do not know what type of shared ownership you have. Your deed or conveyance document may have this information. If your deed does not say, tenancy in common is the default. However, you may want to [**Get Legal Help**]("https://www.illinoislegalaid.org/get-legal-help") 
+buttons:
+  - Exit: exit
+  - Restart: restart
+---
+id: any other beneficiaries
+question: |
+  Do you have any other beneficiaries to tell us about?
+subquestion: |
+  So far you have told us about ${comma_and_list(beneficiaries.complete_elements().full_names())}.
+fields:
+  - "Anyone else?": beneficiaries.there_is_another
+    datatype: yesnoradio
+---
+sets:
+  - beneficiaries[i].name.first
+id: names of beneficiaries
+question: |
+  What is the ${ordinal(i)} beneficiary's name?
+fields:
+  - First name: beneficiaries[i].name.first
+  - Middle name: beneficiaries[i].name.middle
+    required: False
+  - Last name: beneficiaries[i].name.last
+  - Suffix: beneficiaries[i].name.suffix
+    code: |
+      name_suffix()
+    required: False  
+---
+id: beneficiary address
+sets:
+  - beneficiaries[i].address.address
+question: |
+  What is ${beneficiaries[i].name.full(middle='full')}'s address?
+fields:
+  - Street address: beneficiaries[i].address.address
+    address autocomplete: True
+  - Address line 2: beneficiaries[i].address.unit
+    required: False
+  - City: beneficiaries[i].address.city
+  - State: beneficiaries[i].address.state
+    code: |
+      states_list() 
+  - ZIP code: beneficiaries[i].address.zip  
+---
+id: beneficiary relationship
+sets:
+  - beneficiaries[i].relationship
+question: |
+  What is ${beneficiaries[i].name.full(middle='full')}'s relationship to you?
+field: beneficiaries[i].relationship
+combobox:
+  - Parent
+  - Child
+  - Grandchild
+  - Sibling
+  - Cousin
+---
+id: beneficiary benefits
+question: |
+  Does ${beneficiaries[i].name.full(middle='full')} receive any public benefits?
+subquestion: |
+  Public benefits includes SNAP (food stamps), Social Security Disability Insurance (SSDI), or Supplemental Security Income (SSI).
+fields:
+  - no label: beneficiaries[i].benefits
+    datatype: yesnoradio  
+---
+id: benefits explainer
+continue button field: benefits_explainer
+question: |
+  Some public benefits programs have asset limitations. 
+subquestion: |
+  In other words, it is possible that receiving an ownership interest in a home could disqualify someone from the public benefit they receive. You may wish to speak to ${beneficiaries[i].name.full(middle='full')} or a lawyer about this before moving forward.
+---
+sets:
+  - beneficiaries[i].successor_tf
+id: successor beneficiary check
+question: |
+  Would you like to name a successor beneficiary for ${beneficiaries[i].name.full(middle='full')}?
+subquestion: |
+  A successor beneficiary is a loved one who will inherit the property if ${beneficiaries[i].name.full(middle='full')} passes away before you do
+fields:
+  - no label: beneficiaries[i].successor_tf
+    datatype: yesnoradio 
+---
+id: child notice
+continue button field: child_notice
+question: |
+  Note about child beneficiaries
+subquestion: |
+   If you do not name a successor beneficiary and your child passes away before you do, your child's share in your home will go to any surviving children of your child.
+---
+id: probate warning
+continue button field: probate_warning
+question: |
+  Note about probate
+subquestion: |
+  If you do not name a successor beneficiary and ${beneficiaries[0].name.full(middle='full')} passes away before you, your home would go through your estate. This would require your heirs to go through probate court. 
+---
+sets:
+  - beneficiaries[i].successor_beneficiary.name.first
+id: names of beneficiaries
+question: |
+  What is the name of the successor beneficiary for ${beneficiaries[i].name.full(middle='full')}?
+fields:
+  - First name: beneficiaries[i].successor_beneficiary.name.first
+  - Middle name: beneficiaries[i].successor_beneficiary.name.middle
+    required: False
+  - Last name: beneficiaries[i].successor_beneficiary.name.last
+  - Suffix: beneficiaries[i].successor_beneficiary.name.suffix
+    code: |
+      name_suffix()
+    required: False  
+---
+id: successor location
+question: |
+  Where does ${beneficiaries[i].successor_beneficiary.name.full(middle='full')} live?
+fields:
+  - City: beneficiaries[i].successor_beneficiary.address.city
+  - State: beneficiaries[i].successor_beneficiary.address.state
+    code: |
+      states_list() 
+---
+id: successor relationship
+question: |
+  What is ${beneficiaries[i].successor_beneficiary.name.full(middle='full')}'s relationship to you?
+field: beneficiaries[i].successor_beneficiary.relationship
+combobox:
+  - Parent
+  - Child
+  - Grandchild
+  - Sibling
+  - Cousin
+---
+id: tenancy mc
+question: |
+  Would you like your beneficiaries to be **joint tenants** or **tenants in common**?
+subquestion: |
+  **Joint tenant owners** all own an **equal share** of the property. For example, if there are three joint tenant owners, each owner owns 1/3rd of the property. Joint tenant owners also have what the law calls a "**right of survivorship**." This means that when a joint tenant owner passes away, **their share of the property goes to the other joint tenant owners**.
+
+  **Tenants in common** may have **equal or unequal shares**. For example, one owner could own an 80% share of the property and another owner could own a 20% share of the property. These percentages must add up to 100%. Tenant-in-common owners do not have the right of survivorship. If a tenant in common passes away, **their share of the property goes to their estate instead of the remaining tenants in common**.
+field: tenancy_type
+choices:
+  - Joint tenants
+  - Tenants in common
+---
+id: tenancy alt intro
+continue button field: alt_tenancy_intro
+question: |
+  Because you own your share of the property as a tenant in common, your beneficiaries must inherit as **tenants in common**.
+subquestion: |
+  **Tenants in common** may have **equal or unequal shares**. For example, one owner could own an 80% share of the property and another owner could own a 20% share of the property. These percentages must add up to 100%. Tenant-in-common owners do not have the right of survivorship. If a tenant in common passes away, **their share of the property goes to their estate instead of the remaining tenants in common**.
+---
+id: even split
+question: |
+  Do you want to split the property between your beneficiaries evenly?
+fields:
+  - no label: even_split
+    datatype: yesnoradio
+---
+id: beneficiary share
+question: |
+  What is ${beneficiaries[i].name.full(middle='full')}'s percent share of the property?
+subquestion: |
+  The total percentage you have listed so far is ${running_total}%.
+fields:
+  - Percent share: beneficiaries[i].percent_share
+    datatype: number
+---
+id: running total calculate
+event: running_total_calculate
+question: |
+  Filler text
+---
+id: percent error
+continue button field: percent_error
+question: |
+  The percentages you listed for each beneficiary add up to ${running_total}%.
+subquestion: |
+  They should add up to 100%. 
+  
+  If you continue, this program will consider your beneficiaries joint tenants instead of tenants in common.
+  
+  If you would like to edit the percentages, click on the back button.
+---
+#This kickout exists for when there is a percentage is but the ownership cannot be converted to a joint tenancy.
+id: percent kickout
+event: percent_kickout
+question: |
+  The percentages you listed for each beneficiary add up to ${running_total}%.
+subquestion: |
+  They should add up to 100%
+  
+  If you would like to edit the percentages, click on the back button.
+buttons:
+  - Exit: exit
+  - Restart: restart
+---
+id: witnessing
+continue button field: witness_intro
+question: |
+  Do you know who will be your ${ ordinal(i) } witness?
+subquestion: |
+  You will need to have two witnesses sign the TODI with you in front of a notary public. You don't need to know who your witnesses will be right now, but you will need to add their names and addresses later.
+  
+  Your beneficiaries cannot serve as witnesses.
+fields:
+  - no label: witnesses[i].known
+    datatype: yesnoradio
+---
+id: witness name
+question: |
+  What is the name of your ${ ordinal(i) } witness?
+fields:
+  - First: witnesses[i].name.first
+  - Middle: witnesses[i].name.middle
+    required: False
+  - Last: witnesses[i].name.last  
+---
+id: address known
+question: |
+  Do you know ${witnesses[i].name.full(middle="full") }'s address?
+fields:
+  - no label: witnesses[i].location_known
+    datatype: yesnoradio
+---
+id: witness address
+question: |
+  What is ${witnesses[i].name.full(middle="full") }'s address?
+fields:
+  - Street address: witnesses[i].address.address
+    address autocomplete: True
+  - Address line 2: witnesses[i].address.unit
+    required: False
+  - City: witnesses[i].address.city
+  - State: witnesses[i].address.state
+    code: |
+      states_list() 
+  - ZIP code: witnesses[i].address.zip
+---
+id: sign date known
+question: |
+  Do you know when you will sign the TODI?
+subquestion: |
+  You will need to sign in front of 2 witnesses and a notary public. 
+  
+  If you do not know when you will sign, you can fill in the date later.
+fields:
+  - no label: sign_known
+    datatype: yesnoradio
+---
+id: sign date
+question: |
+  When are you going to sign the TODI?
+fields:
+  - Date: sign_date
+    datatype: date
+---
+id: get docs screen
+event: get_docs_screen
+question: |
+  Download
+subquestion: |
+  Your form is ready. View and download your form below. Click **Make changes** to fix any mistakes.
+  
+  Read the instructions to learn what to do next.
+
+  Thank you for using ILAO Easy Forms!
+  
+  ${ action_button_html(url_action('review_answers'), label=':edit: Make changes', color='success', size="md") }
+
+  ${ al_user_bundle.download_list_html() }
+ 
+  &nbsp;
+
+  ${ al_user_bundle.send_button_html(show_editable_checkbox=False) }
+  
+  **Note:** This program does not send your form. You will need to do this yourself.
+
+  Thank you for using ILAO Easy Forms!
+under: |
+  % if not user_logged_in():
+  [${fa_icon("sign-in-alt", color="#0079d0", size="sm")} **Sign-in**](${url_of('login', next=interview_url())}) or [**create**](${url_of('register', next=interview_url())}) an ILAO Easy Form account to save your progress (optional).
+  % endif
+
+ 
+  ${ action_button_html(interview_url(i="docassemble.ILAO:feedback.yml", easy_form_interview=ilao_easy_form_url, easy_form_title=ilao_easy_form_title, easy_form_page=user_info().question_id, easy_form_variable=user_info().variable, local=False,reset=1), label=':comment: Was this program helpful?', color="#181c36", size="md", new_window=True) }
+---
+generic object: ALDocumentBundle
+template: x.send_email_template
+subject: |
+  Transfer on death instrument
+content: |
+  Your forms are attached.
+  
+  Thanks for using ILAO Easy Forms!
+  
+  [**Illinois Legal Aid Online**](https://www.illinoislegalaid.org)
+---
+objects:
+  - al_user_bundle: ALDocumentBundle.using(elements=[todi], filename="transfer_on_death_instrument.pdf", title="Download all forms", enabled=True)
+  - al_court_bundle: ALDocumentBundle.using(elements=[todi], filename="transfer_on_death_instrument", title="Download all forms", enabled=True)
+---
+attachment:
+  - name: todi
+    variable name: todi[i]
+    filename: transfer_on_death_instrument
+    docx template file: todi_docassemble.docx
+---
+objects:
+  - todi: ALDocument.using(title="Transfer on death instrument", filename="todi", enabled=True, has_addendum=False)
+---
+id: review screen
+event: review_answers
+question: |
+  Review screen
+subquestion: |
+  Edit your answers below.
+review: 
+  - Edit: user.name.first
+    button: |
+      **Your name:**
+      ${user.name.full(middle='full')}
+  - Edit: user.address.address
+    button: |
+      **Your address:**
+      ${user.address.on_one_line()}
+  - Edit: user.include_phone
+    button: |
+      **Do you want to include your phone number?**
+      ${word(yesno(user.include_phone))}
+  - Edit: user.phone_number
+    button: |
+      **Your phone number:**
+      ${user.phone_number}
+    show if: user.include_phone
+  - Edit: user.include_email
+    button: |
+      **Do you want to include your email address?**
+      ${word(yesno(user.include_email))}
+  - Edit: user.email_address
+    button: |
+      **Your email address:**
+      ${user.email_address}
+    show if: user.include_email
+  - Edit: user.marital_status
+    button: |
+      **Your marital status:**
+      ${user.marital_status}
+  - Edit: sign_known
+    button: |
+      **Do you know the date you will sign the TODI?**
+      ${word(yesno(sign_known))}
+  - Edit: sign_date
+    button: |
+      **Signing date:**
+      ${sign_date}
+    show if: sign_known
+  - Edit: todi_property.address.address
+    button: |
+      **Address of the property:**
+      ${todi.address.on_one_line()}
+  - Edit: 
+      - trial_court_index
+      - recompute:
+        - trial_court
+    button: |
+      **County of the property?**
+      ${ trial_court.address.county } County
+  - Edit: todi_property.pin
+    button: |
+      **Property Identification Number:**
+      ${todi_property.pin}
+  - Edit: todi_property.description
+    button: |
+      **The property's legal description:**
+      ${todi_property.description}
+  - Edit: other_owners_check
+    button: |
+      **Who owns this property?**
+      % if other_owners_check == "sole":
+      I am the only owner.
+      % else:
+      I share this property with someone else.
+      % endif
+  - Edit: shared_owners_type
+    button: |
+      **Type of shared ownership:**
+      ${shared_owners_type}
+    show if: other_owners_check == "sole"
+  - Edit: beneficiaries.revisit
+    button: |
+      **Beneficiaries: (Edit to change names, addresses, and successors)**
+
+      % for my_var in beneficiaries:
+        * ${ my_var.name.full(middle="full") }
+      % endfor
+  - Edit: tenancy_type
+    button: |
+      **Beneficiaries' tenancy:**
+        ${tenancy_type}
+    show if: beneficiaries.number() != 1
+  - Edit: witnesses[0].known
+    button: |
+      **Do you know who will be the first witness?**
+      ${word(yesno(witnesses[0].known))}
+  - Edit: witnesses[0].name.first
+    button: |
+      **First witness's name:**
+      ${witnesses[0].name.full(middle='full')}
+    show if: witnesses[0].known
+  - Edit: witnesses[0].location_known
+    button: |
+      **Do you know ${witnesses[0].name.full(middle='full')}'s address?**
+      ${word(yesno(witnesses[0].location_known))}
+    show if: witnesses[0].known
+  - Edit: witnesses[0].address.address
+    button: |
+      **${witnesses[0].name.full(middle='full')}'s address:**
+      ${witnesses[0].address.on_one_line()}
+    show if: witnesses[0].location_known
+  - Edit: witnesses[1].known
+    button: |
+      **Do you know who will be the second witness?**
+      ${word(yesno(witnesses[1].known))}
+    show if: witnesses[0].known
+  - Edit: witnesses[1].name.first
+    button: |
+      **Second witness's name:**
+      ${witnesses[1].name.full(middle='full')}
+    show if: witnesses[0].known == True and witnesses[1].known == True
+  - Edit: witnesses[1].location_known
+    button: |
+      **Do you know ${witnesses[1].name.full(middle='full')}'s address?**
+      ${word(yesno(witnesses[1].location_known))}
+    show if: witnesses[0].known == True and witnesses[1].known == True
+  - Edit: witnesses[1].address.address
+    button: |
+      **${witnesses[1].name.full(middle='full')}'s address:**
+      ${witnesses[1].address.on_one_line()}
+    show if: witnesses[1].known == True and witnesses[1].location_known == True
+---
+continue button field: beneficiaries.revisit
+question: |
+  Edit the information about the beneficiaries
+subquestion: |
+  ${ beneficiaries.table }
+
+  ${ beneficiaries.add_action() }
+---
+table: beneficiaries.table
+rows: beneficiaries
+columns:
+  - Name: |
+      row_item.name.full(middle="full") if defined("row_item.name.first") else ""
+  - Share: |
+      row_item.percent_share if defined("row_item.percent_share") else ""
+  - Address: |
+      row_item.address.on_one_line() if defined("row_item.address.address") else ""
+  - Relationship to you: |
+      row_item.relationship if defined("row_item.relationship") else ""
+  - Any successor?: |
+      word(yesno(row_item.successor_tf)) if defined("row_item.successor_tf") else ""
+  - Succesor name: |
+      row_item.successor_beneficiary.name.full(middle='full') if defined("row_item.successor_beneficiary.name.first") else ""
+  - Successor city: |
+      row_item.successor_beneficiary.address.city if defined("row_item.successor_beneficiary.address.city") else ""
+  - Successor state: |
+      row_item.successor_beneficiary.address.state if defined("row_item.successor_beneficiary.address.state") else ""
+delete buttons: True
+confirm: True
+---
+id: section_user
+event: section_user
+question: |
+  About you
+subquestion: |
+  Edit your answers below.
+review:
+  - Edit: user.name.first
+    button: |
+      **Your name:**
+      ${user.name.full(middle='full')}
+  - Edit: user.address.address
+    button: |
+      **Your address:**
+      ${user.address.on_one_line()}
+  - Edit: user.include_phone
+    button: |
+      **Do you want to include your phone number?**
+      ${word(yesno(user.include_phone))}
+  - Edit: user.phone_number
+    button: |
+      **Your phone number:**
+      ${user.phone_number}
+    show if: user.include_phone
+  - Edit: user.include_email
+    button: |
+      **Do you want to include your email address?**
+      ${word(yesno(user.include_email))}
+  - Edit: user.email_address
+    button: |
+      **Your email address:**
+      ${user.email_address}
+    show if: user.include_email
+  - Edit: user.marital_status
+    button: |
+      **Your marital status:**
+      ${user.marital_status}
+  - Edit: sign_known
+    button: |
+      **Do you know the date you will sign the TODI?**
+      ${word(yesno(sign_known))}
+  - Edit: sign_date
+    button: |
+      **Signing date:**
+      ${sign_date}
+    show if: sign_known
+---
+id: section_beneficiaries
+event: section_beneficiaries
+question: |
+  Beneficiaries
+subquestion: |
+  Edit your answers below.
+review:
+  - Edit: beneficiaries.revisit
+    button: |
+      **Beneficiaries: (Edit to change names, addresses, and successors)**
+
+      % for my_var in beneficiaries:
+        * ${ my_var.name.full(middle="full") }
+      % endfor
+  - Edit: tenancy_type
+    button: |
+      **Beneficiaries' tenancy:**
+        ${tenancy_type}
+    show if: beneficiaries.number() != 1
+---
+id: section_property
+event: section_property
+question: |
+  Property
+subquestion: |
+  Edit your answers below.
+review:
+  - Edit: todi_property.address.address
+    button: |
+      **Address of the property:**
+      ${todi.address.on_one_line()}
+  - Edit: 
+      - trial_court_index
+      - recompute:
+        - trial_court
+    button: |
+      **County of the property?**
+      ${ trial_court.address.county } County
+  - Edit: todi_property.pin
+    button: |
+      **Property Identification Number:**
+      ${todi_property.pin}
+  - Edit: todi_property.description
+    button: |
+      **The property's legal description:**
+      ${todi_property.description}
+  - Edit: other_owners_check
+    button: |
+      **Who owns this property?**
+      % if other_owners_check == "sole":
+      I am the only owner.
+      % else:
+      I share this property with someone else.
+      % endif
+  - Edit: shared_owners_type
+    button: |
+      **Type of shared ownership:**
+      ${shared_owners_type}
+    show if: other_owners_check == "sole"
+---
+id: section_witnesses
+event: section_witnesses
+question: |
+  Witnesses
+subquestion: |
+  Edit your answers below.
+review:
+  - Edit: witnesses[0].known
+    button: |
+      **Do you know who will be the first witness?**
+      ${word(yesno(witnesses[0].known))}
+  - Edit: witnesses[0].name.first
+    button: |
+      **First witness's name:**
+      ${witnesses[0].name.full(middle='full')}
+    show if: witnesses[0].known
+  - Edit: witnesses[0].location_known
+    button: |
+      **Do you know ${witnesses[0].name.full(middle='full')}'s address?**
+      ${word(yesno(witnesses[0].location_known))}
+    show if: witnesses[0].known
+  - Edit: witnesses[0].address.address
+    button: |
+      **${witnesses[0].name.full(middle='full')}'s address:**
+      ${witnesses[0].address.on_one_line()}
+    show if: witnesses[0].location_known
+  - Edit: witnesses[1].known
+    button: |
+      **Do you know who will be the second witness?**
+      ${word(yesno(witnesses[1].known))}
+    show if: witnesses[0].known
+  - Edit: witnesses[1].name.first
+    button: |
+      **Second witness's name:**
+      ${witnesses[1].name.full(middle='full')}
+    show if: witnesses[0].known == True and witnesses[1].known == True
+  - Edit: witnesses[1].location_known
+    button: |
+      **Do you know ${witnesses[1].name.full(middle='full')}'s address?**
+      ${word(yesno(witnesses[1].location_known))}
+    show if: witnesses[0].known == True and witnesses[1].known == True
+  - Edit: witnesses[1].address.address
+    button: |
+      **${witnesses[1].name.full(middle='full')}'s address:**
+      ${witnesses[1].address.on_one_line()}
+    show if: witnesses[1].known == True and witnesses[1].location_known == True
