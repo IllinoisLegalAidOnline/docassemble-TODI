@@ -14,11 +14,11 @@ include:
 ---
 objects:
   - user: ALIndividual
-  - todi_property: ALIndividual
+  - todi_property: ALAddress
   - ownership_types: DAList.using(there_are_any=True)
-  - beneficiaries: ALPeopleList.using(there_are_any=True)
+  - beneficiaries: ALPeopleList.using(object_type=ALIndividual, complete_attribute=['complete'], there_are_any=True)
   - beneficiaries[i].successor_beneficiary: ALIndividual
-  - witnesses: ALPeopleList.using(there_are_any=True)
+  - witnesses: ALPeopleList.using(object_type=ALIndividual, there_are_any=True)
   - court_list: ALCourtLoader.using(file_name='docassemble.ILAO:data/sources/il_courts.xlsx')
 ---
 code: |
@@ -44,8 +44,6 @@ code: |
   nav.set_section('section_intro')
   sees_nav_bar
   set_progress(5)
-  first_pass = True
-  running_total = 0
   todi_requirements
   how_to_use
   accept_terms
@@ -57,12 +55,12 @@ code: |
   if user.include_phone == True:
     user.phone_number
   if user.include_email == True:
-    user.email_email
+    user.email
   if user.marital_status == "Married":
     married_note
   nav.set_section('section_property')
-  todi_property.address.address
-  trial_court
+  todi_property.address
+  check_county
   todi_property.pin
   todi_property.description
   if other_owners_check == "multiple":   
@@ -75,19 +73,7 @@ code: |
     elif shared_owners_type == "I do not know":
       unknown_kickout
   nav.set_section('section_beneficiaries')
-  beneficiaries.there_are_any = True
-  for person in beneficiaries:
-    person.name.first
-    person.address.address
-    person.relationship
-    if person.benefits == True:
-      benefits_explainer
-    if person.has_successor == True:
-      person.successor_beneficiary.name.first
-      person.successor_beneficiary.address.city
-      person.successor_beneficiary.relationship
-    elif person.relationship == "Child":
-      child_notice
+  beneficiaries.gather()
   if beneficiaries.number() != 1:
     equal_share_reference
     if other_owners_check == "multiple" and shared_owners_type == "Tenancy in common":
@@ -96,6 +82,7 @@ code: |
     if tenancy_type == "Tenants in common":
       even_split
     if tenancy_type == "Tenants in common" and even_split == False:
+      running_total = 0
       for person in beneficiaries:
         person.percent_share
         running_total = running_total + person.percent_share
@@ -273,7 +260,7 @@ id: user email address
 question: |
   What is your email address?
 fields: 
-  - Email: user.email_email
+  - Email: user.email
     datatype: email
 ---
 id: user marital status
@@ -303,37 +290,73 @@ id: property address
 question: |
   What is the address of the property you want to include in the TODI?
 fields:
-  - Street address: todi_property.address.address
+  - Street address: todi_property.address
     address autocomplete: True
-  - Address line 2: todi_property.address.unit
+  - Address line 2: todi_property.unit
     required: False
-  - City: todi_property.address.city
-  - State: todi_property.address.state
+  - City: todi_property.city
+  - State: todi_property.state
     code: |
       states_list() 
-  - ZIP code: todi_property.address.zip
-  - County: trial_court_index
-    #address autocomplete: True
-    code: |
-      court_county_lookup()
+  - ZIP code: todi_property.zip
+  - County: todi_property.county
 ---
-id: trial court county
+template: county_lookup_help
+subject: |
+  **How do I look up the county?**
+content: |  
+  You can use this **[City-to-County Finder](https://www.statsamerica.org/CityCountyFinder/)** to find the county.
+---
+id: property county
 continue button field: property_county
 question: |
   In which county is the property located?
+subquestion: |
+  We could not find the county for the property at ${ todi_property.on_one_line(bare=True) } in the list of Illinois counties, but you can select it here.
+
+  ${ collapse_template(county_lookup_help) }
 fields:
   - no label: trial_court_index
     code: |
       court_county_lookup()
 ---   
 code: |
-  def court_county_lookup():
+  def court_county_lookup(lowercase=False):
     all_court_counties = court_list._load_courts()['address_county'].items()
-    filtered_courts = [(-1, "Cook")]
+    filtered_courts = [(-1, "cook")] if lowercase else [(-1, "Cook")]
     for court in all_court_counties:
       if court[1] != "Cook":
-        filtered_courts.append(court)
+        court_name = court[1].lower() if lowercase else court[1]
+        filtered_courts.append((court[0],court_name))
     return sorted( filtered_courts, key=lambda y: y[1])
+---
+code: |
+  def get_county_list(lowercase=False):
+    county_list = [*set(court_list._load_courts()['address_county'])]
+    county_list.sort()
+    return county_list
+---
+depends on:
+  - trial_court_index
+code: |
+  county_name = todi_property.county.lower()
+  
+  if county_name.endswith(" county"):
+    county_name = todi_property.county.lower()[0:-7]
+
+  county_found = False
+  for item in get_county_list():
+    if county_name == str(item).lower():
+      county_found = True
+
+  if county_found == False:
+    trial_court_index
+    if trial_court_index == "-1":
+      trial_court = court_list.as_court('trial_court', 15)
+    else:
+      trial_court = court_list.as_court('trial_court', trial_court_index)
+    todi_property.county = trial_court.address.county + " County" 
+  check_county = True
 ---
 depends on:
   - trial_court_index
@@ -384,7 +407,7 @@ question: |
 field: other_owners_check
 choices:
   - I am the only owner.: sole
-  - I share this property with someone else.: multiple
+  - I share ownership of this property with someone else.: multiple
 ---
 sets:
   - ownership_types[i]
@@ -416,19 +439,23 @@ choices:
 id: tenant in common explanation
 continue button field: common_explanation
 question: |
+  Tenancy in common
+subquestion: |
   As you are a tenant in common, you and the other owner(s) must make separate TODIs. Your TODI will transfer your share of the property to your beneficiaries.
 ---
 id: joint tenant explanation
 continue button field: joint_explanation
 question: |
-  As you are a joint owner, you and the other owner(s) could file a TODI together. However, this program can only make a TODI for a single owner.
+  Joint tenancy
 subquestion: |
+  As you are a joint owner, you and the other owner(s) could file a TODI together. However, this program can only make a TODI for a single owner.
+  
   You and the other owner(s) can each file your own TODIs, but only the TODI of the owner who passes away last would take effect.
 ---
 id: tenant entirety explanation
 continue button field: entirety_explanation
 question: |
-  This program can only make a TODI for a single owner.
+  Tenancy in the entirety
 subquestion: |
   As you and your spouse are tenants in the entirety, you could file a TODI together if you both agree who should get the home after you both pass away. However, this program can only make a TODI for a single owner.
 
@@ -452,6 +479,20 @@ subquestion: |
 fields:
   - "Anyone else?": beneficiaries.there_is_another
     datatype: yesnoradio
+---
+code: |
+  beneficiaries[i].name.first
+  beneficiaries[i].address.address
+  if beneficiaries[i].benefits == True:
+    benefits_explainer
+  beneficiaries[i].relationship
+  if beneficiaries[i].has_successor == True:
+    beneficiaries[i].successor_beneficiary.name.first
+    beneficiaries[i].successor_beneficiary.address.city
+    beneficiaries[i].successor_beneficiary.relationship
+  elif beneficiaries[i].relationship == "Child":
+    child_notice
+  beneficiaries[i].complete = True 
 ---
 sets:
   - beneficiaries[i].name.first
@@ -502,7 +543,7 @@ fields:
   - Other: beneficiaries[i].relationship
     show if: 
       variable: beneficiaries[i].relationship_radio
-      is: "Other"
+      is: "Other"     
 ---
 sets:
   beneficiaries[i].relationship
@@ -538,7 +579,11 @@ id: successor beneficiary check
 question: |
   Would you like to name a successor beneficiary for ${beneficiaries[i].name.full(middle='full')}?
 subquestion: |
-  A successor beneficiary is a loved one who will inherit the property if ${beneficiaries[i].name.full(middle='full')} passes away before you do
+  A successor beneficiary is a loved one who will inherit the property if ${beneficiaries[i].name.full(middle='full')} passes away before you do.
+  
+  % if beneficiaries[i].relationship_radio == "Child":
+  **Note:** If you do not name a successor beneficiary and your child passes away before you do, your child's share in your home will go to any surviving children of your child.
+  % endif
 fields:
   - no label: beneficiaries[i].has_successor
     datatype: yesnoradio 
@@ -556,6 +601,13 @@ question: |
   Note about probate
 subquestion: |
   If you do not name a successor beneficiary and ${beneficiaries[0].name.full(middle='full')} passes away before you, your home would go through your estate. This would require your heirs to go through probate court. 
+---
+sets:
+  - first_pass
+  - running_total
+code: |
+  first_pass = True
+  running_total = 0
 ---
 sets:
   - beneficiaries[i].successor_beneficiary.name.first
@@ -632,7 +684,9 @@ code: |
   equal_share_reference = 100 / beneficiaries.number_gathered()
 ---
 depends on:
-  equal_share_reference
+  - equal_share_reference
+  - tenancy_type
+  - even_split
 code: |
   if tenancy_type == "Joint tenants" or even_split == True:
     for person in beneficiaries:
@@ -644,20 +698,36 @@ question: |
   How do you want to split the property between your beneficiaries?
 field: even_split
 choices:
-  - "An equal amount (${equal_share_reference}%) for each person." : True
-  - "Different amounts for each person." : False  
+  - "An equal amount (${thousands((100 / beneficiaries.number_gathered()), show_decimals = True)}%) for each person" : True
+  - "Different amounts for each person" : False  
 #fields:
   #- no label: even_split
     #datatype: yesnoradio
 ---
+depends on:
+  - tenancy_type
+  - even_split
 id: beneficiary share
 question: |
   What is ${beneficiaries[i].name.full(middle='full')}'s percent share of the property?
 subquestion: |
+  % if i > 0:
+  
+  % for person in beneficiaries:
+  % if beneficiaries.index(person) < i:
+  * ${person.name.full(middle='full')}'s share is ${person.percent_share}%.  
+  % else:
+  * ${person.name.full(middle='full')}'s share is 0%.
+  % endif
+  % endfor
+  % endif
+  
   The total percentage you have listed so far is ${running_total}%.
 fields:
-  - Percent share: beneficiaries[i].percent_share
+  - ${beneficiaries[i].name.full(middle='full')}'s percent share: beneficiaries[i].percent_share
     datatype: number
+    min: 0.01
+    max: 99.99
 ---
 depends on:
   - beneficiaries.number_gathered()
@@ -676,9 +746,14 @@ question: |
 id: percent error
 continue button field: percent_error
 question: |
-  The percentages you listed for each beneficiary add up to ${running_total}%.
+  Shares do not add up to 100%
 subquestion: |
-  They should add up to 100%. 
+
+  % for person in beneficiaries:
+  * ${person.name.full(middle='full')}'s share is ${person.percent_share}%.
+  % endfor
+  
+  The percentages you listed for each beneficiary add up to ${running_total}%. They should add up to 100%. 
   
   If you continue, this program will consider your beneficiaries joint tenants instead of tenants in common${ fa_icon("question-circle", color_css="#0DCAF0" ) }.
   
@@ -828,10 +903,10 @@ review:
     button: |
       **Do you want to include your email address?**
       ${word(yesno(user.include_email))}
-  - Edit: user.email_email
+  - Edit: user.email
     button: |
       **Your email address:**
-      ${user.email_email}
+      ${user.email}
     show if: user.include_email
   - Edit: user.marital_status
     button: |
@@ -983,10 +1058,10 @@ review:
     button: |
       **Do you want to include your email address?**
       ${word(yesno(user.include_email))}
-  - Edit: user.email_email
+  - Edit: user.email
     button: |
       **Your email address:**
-      ${user.email_email}
+      ${user.email}
     show if: user.include_email
   - Edit: user.marital_status
     button: |
@@ -1118,6 +1193,10 @@ review:
     button: |
       **${ x.name.full(middle="full") }'s phone number:**
       ${ phone_number_formatted(x.phone_number) }
+  - Edit: x.relationship
+    button: |
+      **${x.name.full(middle='full')}'s relationship to you:**
+      ${x.relationship}
   - Edit: x.percent_share
     button: |
       **${ x.name.full(middle="full") }'s share of the property:**
@@ -1127,13 +1206,18 @@ review:
     button: |
       **Does ${x.name.full(middle='full')} have a successor beneficiary?**
       ${word(yesno(x.has_successor))}
-  #- Edit: x.successor_beneficiary.name.first
-    #button: |
-      #**Successor beneficiary's name:**
-      #${x.successor_beneficiary.name.full(middle='full)}
-    #show if: x.has_successor == True
-  #- Edit: x.successor_beneficiary.address.city
-    #button: |
-      #**${x.successor_beneficiary.name.full(middle='full)}'s location:**
-      #${x.successor_beneficiary.address.city}, ${x.successor_beneficiary.address.state}
-    #show if: x.has_successor == True
+  - Edit: x.successor_beneficiary.name.first
+    button: |
+      **Successor beneficiary's name:**
+      ${x.successor_beneficiary.name.full(middle='full')}
+    show if: x.has_successor == True
+  - Edit: x.successor_beneficiary.address.city
+    button: |
+      **${x.successor_beneficiary.name.full(middle='full')}'s location:**
+      ${x.successor_beneficiary.address.city}, ${x.successor_beneficiary.address.state}
+    show if: x.has_successor == True
+  - Edit: x.successor_beneficiary.relationship
+    button: |
+      **${x.successor_beneficiary.name.full(middle='full')}'s relationship to you:**
+      ${x.successor_beneficiary.relationship}
+    show if: x.has_successor == True
