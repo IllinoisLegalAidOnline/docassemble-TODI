@@ -74,31 +74,9 @@ code: |
       unknown_kickout
   nav.set_section('section_beneficiaries')
   beneficiaries.gather()
-  if beneficiaries.number() != 1:
-    equal_share_reference
-    if other_owners_check == "multiple" and shared_owners_type == "Tenancy in common":
-      alt_tenancy_intro
-      tenancy_type = "Tenants in common"
-    if tenancy_type == "Tenants in common":
-      even_split
-    if tenancy_type == "Tenants in common" and even_split == False:
-      running_total = 0
-      for person in beneficiaries:
-        person.percent_share
-        running_total = running_total + person.percent_share
-      if running_total != 100 and tenancy_type == "Tenants in common":
-        if other_owners_check == "multiple" and shared_owners_type == "Tenancy in common":
-          percent_kickout
-        else:
-          percent_error
-          tenancy_type = "Joint tenants"
-    else:
-      equal_splitting
-  else:
-    if beneficiaries[0].relationship != "Child":
-      if beneficiaries[0].has_successor == False:
-        probate_warning
+  share_calculator
   nav.set_section('section_witnesses')
+  #reconsider('beneficiary_count')
   if witnesses[0].known == True:
     witnesses[0].name.first
     if witnesses[0].location_known == True:
@@ -414,17 +392,22 @@ sets:
 depends on:
   - user.marital_status
 code: |
-  ownership_types.there_is_another = True
   if user.marital_status == "Married":
-    ownership_types.clear()
-    #ownership_types.append([{'Tenancy in common': "Tenancy in common", 'help': "test"}, {'Joint tenancy': "Joint tenancy", 'help': "'I do not know'"}, {'Tenancy by the entirety': "Tenancy by the entirety", 'help': "'I do not know'"}, {'I do not know': "I do not know"}])
-    ownership_types.append('Tenancy in common', 'Joint tenancy', 'Tenancy by the entirety', 'I do not know')
-    ownership_types.gathered = True
-  if user.marital_status != "Married":
-    ownership_types.clear()
-    ownership_types.append('Tenancy in common', 'Joint tenancy', 'I do not know')
-    ownership_types.gathered = True
-  ownership_types.there_is_another = False
+    ownership_types = [
+      {"Tenancy in common": "Tenancy in common",
+        "help": "Tenants in common may have equal or unequal shares. For example, one owner could own an 80% share of the property and another owner could own a 20% share of the property. These percentages must add up to 100%. Tenant-in-common owners do not have the right of survivorship. If a tenant in common passes away, their share of the property goes to their estate instead of the remaining tenants in common."},
+      {"Joint Tenancy": "Joint Tenancy",
+        "help": "Joint tenant owners all own an equal share of the property. For example, if there are three joint tenant owners, each owner owns 1/3rd of the property. Joint tenant owners also have what the law calls a 'right of survivorship.' This means that when a joint tenant owner passes away, their share of the property goes to the other joint tenant owners."},
+      {"Tenancy by the entirety": "Tenancy by the entirety",
+        "help": "A tenancy by the entirety can only exist when a property is owned by a married couple. It is similar to a joint tenancy. If one spouse passes away, the other spouse gets their share of the property. The property's deed must explicitly state the couple owns the property as tenants by the entirety."},
+      {"I do not know": "I do not know"}]   
+  else:
+    ownership_types = [
+      {"Tenancy in common": "Tenancy in common",
+        "help": "Tenants in common may have equal or unequal shares. For example, one owner could own an 80% share of the property and another owner could own a 20% share of the property. These percentages must add up to 100%. Tenant-in-common owners do not have the right of survivorship. If a tenant in common passes away, their share of the property goes to their estate instead of the remaining tenants in common."},
+      {"Joint Tenancy": "Joint Tenancy",
+        "help": "Joint tenant owners all own an equal share of the property. For example, if there are three joint tenant owners, each owner owns 1/3rd of the property. Joint tenant owners also have what the law calls a 'right of survivorship.' This means that when a joint tenant owner passes away, their share of the property goes to the other joint tenant owners."},
+      {"I do not know": "I do not know"}]   
 ---
 id: shared owners type
 question: |
@@ -679,19 +662,49 @@ subquestion: |
   **Tenants in common** may have **equal or unequal shares**. For example, one owner could own an 80% share of the property and another owner could own a 20% share of the property. These percentages must add up to 100%. Tenant-in-common owners do not have the right of survivorship. If a tenant in common passes away, **their share of the property goes to their estate instead of the remaining tenants in common**.
 ---
 depends on:
-  - beneficiaries.number_gathered()
+  - beneficiary_count
 code: |
   equal_share_reference = 100 / beneficiaries.number_gathered()
+---
+code: |
+  beneficiary_count = beneficiaries.number_gathered()
+---
+reset:
+  - beneficiary_count 
+  - equal_share_reference
 ---
 depends on:
   - equal_share_reference
   - tenancy_type
   - even_split
+  - beneficiary_count
 code: |
-  if tenancy_type == "Joint tenants" or even_split == True:
-    for person in beneficiaries:
-      person.percent_share = equal_share_reference
-  equal_splitting = True
+  if beneficiaries.number() != 1:
+    equal_share_reference
+    if other_owners_check == "multiple" and shared_owners_type == "Tenancy in common":
+      alt_tenancy_intro
+      tenancy_type = "Tenants in common"
+    if tenancy_type == "Tenants in common":
+      even_split
+    if tenancy_type == "Joint tenants" or even_split == True:
+      for person in beneficiaries:
+        person.percent_share = equal_share_reference
+    else:
+      running_total = 0
+      for person in beneficiaries:
+        person.percent_share
+        running_total = running_total + person.percent_share
+      if running_total != 100 and tenancy_type == "Tenants in common":
+        if other_owners_check == "multiple" and shared_owners_type == "Tenancy in common":
+          percent_kickout
+        else:
+          percent_error
+          tenancy_type = "Joint tenants"
+  else:
+    if beneficiaries[0].relationship != "Child":
+      if beneficiaries[0].has_successor == False:
+        probate_warning
+  share_calculator = True
 ---
 id: even split
 question: |
