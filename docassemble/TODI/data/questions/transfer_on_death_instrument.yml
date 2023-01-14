@@ -18,7 +18,7 @@ objects:
   - ownership_types: DAList.using(there_are_any=True)
   - beneficiaries: ALPeopleList.using(object_type=ALIndividual, complete_attribute=['complete'], there_are_any=True)
   - beneficiaries[i].successor_beneficiary: ALIndividual
-  - witnesses: ALPeopleList.using(object_type=ALIndividual, there_are_any=True)
+  - witnesses: ALPeopleList.using(object_type=ALIndividual, complete_attribute=['complete'], there_are_any=True)
   - court_list: ALCourtLoader.using(file_name='docassemble.ILAO:data/sources/il_courts.xlsx')
 ---
 code: |
@@ -252,7 +252,7 @@ choices:
   - Married
   - Legally separated by a judge: Legally separated by a judge
     help: |
-      A legal separation is a court-ordered arrangement for a married couple to live separately and separate their assets. If live apart from your spouse but were not separated by a judge, you are still considered married.
+      A legal separation is a court-ordered arrangement for a married couple to live separately and separate their assets. If you live apart from your spouse but were not separated by a judge, you are still considered married.
   - Divorced
   - Widowed
 ---
@@ -264,9 +264,9 @@ subquestion: |
   If your spouse outlives you they may be able to stop your TODI, even if you have been separated for a long time. If they stop the TODI, your spouse will receive a share of the property. 
   Learn more about:
   
-  * [What happens when I die without a will?](https://www.illinoislegalaid.org/legal-information/what-happens-when-i-die-without-will/)
-  * [Giving someone your house when you die](https://www.illinoislegalaid.org/legal-information/giving-someone-your-house-when-you-die)
-  * [A will as a legal document to explain my wishes after I die](https://www.illinoislegalaid.org/legal-information/will-legal-document-explain-my-wishes-after-i-die)
+  * [**What happens when I die without a will?**](https://www.illinoislegalaid.org/legal-information/what-happens-when-i-die-without-will/)
+  * [**Giving someone your house when you die**](https://www.illinoislegalaid.org/legal-information/giving-someone-your-house-when-you-die)
+  * [**A will as a legal document to explain my wishes after I die**](https://www.illinoislegalaid.org/legal-information/will-legal-document-explain-my-wishes-after-i-die)
 ---
 id: property address
 question: |
@@ -354,12 +354,12 @@ question: |
 subquestion: |
   You can find your PIN at your County Clerk's Office or Assessor's Office, and sometimes at your county's website. If your property is in one of the counties below, click the link to look up your PIN: 
 
-  * [Cook County](http://www.cookcountypropertyinfo.com/)
-  * [DuPage County](http://www.dupageco.org/PropertyInfo/PropertyLookup.aspx)
-  * [Kane County](https://lrs.kanecountyrecorder.net/)
-  * [Lake County](http://www.lakecountyil.gov/154/Chief-County-Assessment-Office)
-  * [McHenry County](http://www.mchenrycountygis.org/Athena/#)
-  * [Will County](https://www.willcountysoa.com/section/Property-Search-Portal)
+  * [**Cook County**](http://www.cookcountypropertyinfo.com/)
+  * [**DuPage County**](http://www.dupageco.org/PropertyInfo/PropertyLookup.aspx)
+  * [**Kane County**](https://lrs.kanecountyrecorder.net/)
+  * [**Lake County**](http://www.lakecountyil.gov/154/Chief-County-Assessment-Office)
+  * [**McHenry County**](http://www.mchenrycountygis.org/Athena/#)
+  * [**Will County**](https://www.willcountysoa.com/section/Property-Search-Portal)
   
   If your property is in a different county, search online to find your county's Recorder of Deeds website and see if you can look up your deed for free online.  
   
@@ -371,16 +371,16 @@ id: property description
 question: |
   What is the legal description of the property?
 subquestion: |
-  You can find the legal description on the property deed or other documents recorded against the property. If you do not have these, you can find them at the office of County Recorder of Deeds or their website. For example, in Cook County, you would go to the Recorder of Deeds website and search for your deed using your PIN. You could then view an image of the deed which contains the legal description. 
+  You can find the legal description on the deed or other property documents. You can find the deed via the County Recorder of Deeds. For example, in Cook County, you would go to the Recorder of Deeds website and search for your deed using your PIN. You could then view an image of the deed which contains the legal description. 
 
-  Be very careful in writing the property description. You should copy the legal description exactly. You may wish to compare the deed to other documents (such as a mortgage or lien) to see if the descriptions are the same. If your property is in one of the counties listed below, you can click to visit the county recorder's website to look up your deed. Keep in mind that you may need to register for an account and log in to view the deed and any other documents recorded against the property:
+  Be careful in writing the property description. You should copy the legal description exactly. You may wish to compare the deed to other documents (such as a mortgage) to see if the descriptions are the same. If your property is in one of the counties listed below, you can click to visit the county recorder's website to look up your deed:
 
-  * [Cook County](http://cookrecorder.com/"»Cook County Recorder of Deeds)
-  * [DuPage County](https://www.dupageco.org/Recorder/31274/)
-  * [Kane County](https://lrs.kanecountyrecorder.net/)
-  * [Lake County](https://www.lakecountyil.gov/258/Recorder-of-Deeds)
-  * [McHenry County](https://www.co.mchenry.il.us/county-government/departments-a-i/county-recorder)
-  * [Will County](https://www.willcountysoa.com/section/Property-Search-Portal)
+  * [**Cook County**](http://cookrecorder.com/"»Cook County Recorder of Deeds)
+  * [**DuPage County**](https://www.dupageco.org/Recorder/31274/)
+  * [**Kane County**](https://lrs.kanecountyrecorder.net/)
+  * [**Lake County**](https://www.lakecountyil.gov/258/Recorder-of-Deeds)
+  * [**McHenry County**](https://www.co.mchenry.il.us/county-government/departments-a-i/county-recorder)
+  * [**Will County**](https://www.willcountysoa.com/section/Property-Search-Portal)
 
   If your property is in a different county, search online to find your county's Recorder of Deeds website and see if you can look up your deed for free online.
 fields:
@@ -404,19 +404,19 @@ code: |
   if user.marital_status == "Married":
     ownership_types = [
       {"Tenancy in common": "Tenancy in common",
-        "help": "**Tenants in common** may have equal or unequal shares. For example, one owner could own an 80% share of the property and another owner could own a 20% share of the property. These percentages must add up to 100%. **Tenant-in-common** owners do not have the right of survivorship. If a **tenant in common** passes away, their share of the property goes to their estate instead of the remaining **tenants in common**."},
+        "help": "**Tenants in common** may have equal or unequal shares. For example, one owner could own an 80% share of the property and another owner could own a 20% share of the property. These percentages must add up to 100%. Tenant-in-common owners do not have the right of survivorship. If a tenant in common passes away, their share of the property goes to their estate instead of the remaining tenants in common."},
       {"Joint Tenancy": "Joint Tenancy",
-        "help": "**Joint tenant** owners all own an equal share of the property. For example, if there are three **joint tenant** owners, each owner owns 1/3rd of the property. **Joint tenant** owners also have what the law calls a 'right of survivorship.' This means that when a **joint tenant** owner passes away, their share of the property goes to the other **joint tenant** owners."},
+        "help": "**Joint tenant** owners all own an equal share of the property. For example, if there are three joint tenant owners, each owner owns 1/3rd of the property. Joint tenant owners also have what the law calls a 'right of survivorship.' This means that when a joint tenant owner passes away, their share of the property goes to the other joint tenant owners."},
       {"Tenancy by the entirety": "Tenancy by the entirety",
-        "help": "A **tenancy by the entirety** can only exist when a property is owned by a married couple. It is similar to a **joint tenancy**. If one spouse passes away, the other spouse gets their share of the property. The property's deed must explicitly state the couple owns the property as **tenants by the entirety**."},
-      {"I do not know": "I do not know"}]   
+        "help": "A **tenancy by the entirety** can only exist when a property is owned by a married couple. It is similar to a joint tenancy. If one spouse passes away, the other spouse gets their share of the property. The property's deed must explicitly state the couple owns the property as tenants by the entirety."},
+      {"I do not know": "I do not know."}]   
   else:
     ownership_types = [
       {"Tenancy in common": "Tenancy in common",
-        "help": "**Tenants in common** may have equal or unequal shares. For example, one owner could own an 80% share of the property and another owner could own a 20% share of the property. These percentages must add up to 100%. **Tenant-in-common** owners do not have the right of survivorship. If a tenant in common passes away, their share of the property goes to their estate instead of the remaining **tenants in common**."},
+        "help": "**Tenants in common** may have equal or unequal shares. For example, one owner could own an 80% share of the property and another owner could own a 20% share of the property. These percentages must add up to 100%. Tenant-in-common owners do not have the right of survivorship. If a tenant in common passes away, their share of the property goes to their estate instead of the remaining tenants in common."},
       {"Joint Tenancy": "Joint Tenancy",
-        "help": "**Joint tenant** owners all own an equal share of the property. For example, if there are three **joint tenant** owners, each owner owns 1/3rd of the property. **Joint tenant** owners also have what the law calls a 'right of survivorship.' This means that when a **joint tenant** owner passes away, their share of the property goes to the other **joint tenant** owners."},
-      {"I do not know": "I do not know"}]   
+        "help": "**Joint tenant** owners all own an equal share of the property. For example, if there are three joint tenant owners, each owner owns 1/3rd of the property. Joint tenant owners also have what the law calls a 'right of survivorship.' This means that when a joint tenant owner passes away, their share of the property goes to the other joint tenant owners."},
+      {"I do not know": "I do not know."}]   
 ---
 id: shared owners type
 question: |
@@ -433,16 +433,16 @@ continue button field: common_explanation
 question: |
   Tenancy in common
 subquestion: |
-  As you are a **tenant in common**, you and the other owner(s) must make separate TODIs. Your TODI will transfer your share of the property to your beneficiaries.
+  As you are a **tenant in common**, you and the other owners must make separate TODIs. Your TODI will transfer your share of the property to your beneficiaries.
 ---
 id: joint tenant explanation
 continue button field: joint_explanation
 question: |
   Joint tenancy
 subquestion: |
-  As you are a **joint** owner, you and the other owner(s) could file a TODI together. However, this program can only make a TODI for a single owner.
+  As you are a **joint** owner, you and the other owners could file a TODI together. However, this program can only make a TODI for a single owner.
   
-  You and the other owner(s) can each file your own TODIs, but only the TODI of the owner who passes away last would take effect.
+  You and the other owners can each file your own TODIs, but only the TODI of the owner who passes away last would take effect.
 ---
 id: tenant entirety explanation
 continue button field: entirety_explanation
@@ -553,7 +553,7 @@ id: beneficiary benefits
 question: |
   Does ${beneficiaries[i].name.full(middle='full')} receive any public benefits?
 subquestion: |
-  Public benefits includes SNAP (food stamps), Social Security Disability Insurance (SSDI), or Supplemental Security Income (SSI).
+  Public benefits include SNAP (food stamps), Social Security Disability Insurance (SSDI), or Supplemental Security Income (SSI).
 fields:
   - no label: beneficiaries[i].benefits
     datatype: yesnoradio  
@@ -668,17 +668,17 @@ field: tenancy_type
 choices:
   - Joint tenants: Joint tenants
     help: |
-      **Joint tenant** owners all own an equal share of the property. For example, if there are three **joint tenant** owners, each owner owns 1/3rd of the property. **Joint tenant** owners also have what the law calls a "right of survivorship." This means that when a **joint tenant** owner passes away, their share of the property goes to the other **joint tenant** owners.  
+      **Joint tenant** owners all own an equal share of the property. For example, if there are three joint tenant owners, each owner owns 1/3rd of the property. Joint tenant owners also have what the law calls a "right of survivorship." This means that when a joint tenant owner passes away, their share of the property goes to the other joint tenant owners.  
   - Tenants in common: Tenants in common
     help: |
-      **Tenants in common** may have equal or unequal shares. For example, one owner could own an 80% share of the property and another owner could own a 20% share of the property. These percentages must add up to 100%. **Tenant-in-common** owners do not have the right of survivorship. If a **tenant** in common passes away, their share of the property goes to their estate instead of the remaining **tenants in common**.
+      **Tenants in common** may have equal or unequal shares. For example, one owner could own an 80% share of the property and another owner could own a 20% share of the property. These percentages must add up to 100%. Tenant-in-common owners do not have the right of survivorship. If a tenant in common passes away, their share of the property goes to their estate instead of the remaining tenants in common.
 ---
 id: tenancy alt intro
 continue button field: alt_tenancy_intro
 question: |
-  Because you own your share of the property as a **tenant in common**, your beneficiaries must inherit as **tenants in common**.
+  Because you own your share of the property as a tenant in common, your beneficiaries must inherit as tenants in common.
 subquestion: |
-  **Tenants in common** may have **equal or unequal shares**. For example, one owner could own an 80% share of the property and another owner could own a 20% share of the property. These percentages must add up to 100%. Tenant-in-common owners do not have the right of survivorship. If a tenant in common passes away, **their share of the property goes to their estate instead of the remaining tenants in common**.
+  **Tenants in common** may have **equal or unequal shares**. For example, one owner could own an 80% share of the property and another owner could own a 20% share of the property. These percentages must add up to 100%. Tenant-in-common owners do not have the right of survivorship. If a tenant in common passes away, **their share of the property goes to their estate instead of to the remaining tenants in common**.
 ---
 depends on:
   - beneficiary_count
@@ -793,7 +793,7 @@ subquestion: |
   
   The percentages you listed for each beneficiary add up to ${running_total}%. They should add up to 100%. 
   
-  If you click **Next**, this program will consider your beneficiaries **joint tenants** instead of **{tenants in common}**.
+  If you click **Next**, this program will consider your beneficiaries **{joint tenants}** instead of **{tenants in common}**.
   
   If you would like to edit the percentages, click **Back**.
 ---
@@ -801,19 +801,18 @@ subquestion: |
 id: percent kickout
 event: percent_kickout
 question: |
-  The percentages you listed for each beneficiary add up to ${running_total}%.
+  Shares do not add up to 100%.
 subquestion: |
-  They should add up to 100%
+  The percentages you listed for each beneficiary add up to ${running_total}%. They should add up to 100%.
   
-  If you would like to edit the percentages, click on the back button.
+  If you would like to edit the percentages, click on **Back**.
 buttons:
   - Exit: exit
   - Restart: restart
 ---
 id: witnessing
-continue button field: witness_intro
 question: |
-  Do you know who will be your ${ ordinal(i) } witness?
+  Do you know who your ${ ordinal(i) } witness will be?
 subquestion: |
   You will need to have two witnesses sign the TODI with you in front of a notary public. You don't need to know who your witnesses will be right now, but you will need to add their names and addresses later.
   
@@ -841,6 +840,8 @@ fields:
 id: witness address
 question: |
   What is ${witnesses[i].name.full(middle="full") }'s address?
+subquestion: |
+  If you do not know this now, you can add it when ${witnesses[i].name.full(middle="full") } signs the TODI as your witness.
 fields:
   - Street address: witnesses[i].address.address
     address autocomplete: True
@@ -954,10 +955,10 @@ review:
     button: |
       **Your marital status:**
       ${user.marital_status}
-  - Edit: todi_property.address.address
+  - Edit: todi_property.address
     button: |
       **Address of the property:**
-      ${todi.address.on_one_line(bare=True)}
+      ${todi_property.on_one_line(bare=True)}
   - Edit: 
       - trial_court_index
       - recompute:
@@ -985,7 +986,7 @@ review:
     button: |
       **Type of shared ownership:**
       ${shared_owners_type}
-    show if: other_owners_check == "sole"
+    show if: other_owners_check != "sole"
   - Edit: beneficiaries.revisit
     button: |
       **Beneficiaries: (Edit to change names, addresses, and successors)**
@@ -1141,10 +1142,10 @@ question: |
 subquestion: |
   Edit your answers below.
 review:
-  - Edit: todi_property.address.address
+  - Edit: todi_property.address
     button: |
       **Address of the property:**
-      ${todi.address.on_one_line(bare=True)}
+      ${todi_property.on_one_line(bare=True)}
   - Edit: 
       - trial_court_index
       - recompute:
@@ -1172,7 +1173,7 @@ review:
     button: |
       **Type of shared ownership:**
       ${shared_owners_type}
-    show if: other_owners_check == "sole"
+    show if: other_owners_check != "sole"
 ---
 id: review witnesses
 event: section_witnesses
