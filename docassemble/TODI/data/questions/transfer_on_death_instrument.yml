@@ -18,9 +18,7 @@ objects:
   - ownership_types: DAList.using(there_are_any=True)
   - beneficiaries: ALPeopleList.using(object_type=ALIndividual, complete_attribute=['complete'], there_are_any=True)
   - beneficiaries[i].successor_beneficiary: ALIndividual
-  #- witnesses: ALPeopleList.using(object_type=ALIndividual, complete_attribute=['complete'], there_are_any=True)
-  - first_witness: ALIndividual
-  - second_witness: ALIndividual
+  - witnesses: ALPeopleList.using(there_are_any=True)
   - court_list: ALCourtLoader.using(file_name='docassemble.ILAO:data/sources/il_courts.xlsx')
 ---
 code: |
@@ -79,16 +77,14 @@ code: |
   share_calculator
   nav.set_section('section_witnesses')
   #reconsider('beneficiary_count')
-  if first_witness.known == True:
-    first_witness.name.first
-    if first_witness.location_known == True:
-      first_witness.address.address
-    witnesses.gathered = False
-    if second_witness.known == True:
-      second_witness.name.first
-      if second_witness.location_known == True:
-        second_witness.address.address
-  witnesses.gathered = True
+  if first_witness_known == True:
+    witnesses[0].name.first
+    if first_witness_address_known == True:
+      witnesses[0].address.address 
+    if second_witness_known == True:
+      witnesses[1].name.first
+      if second_witness_address_known == True:
+        witnesses[1].address.address
   nav.set_section('section_download')
   if beneficiary_count  == 1:
     percent_default
@@ -361,7 +357,7 @@ subquestion: |
   * [**DuPage County**](http://www.dupageco.org/PropertyInfo/PropertyLookup.aspx)
   * [**Kane County**](https://lrs.kanecountyrecorder.net/)
   * [**Lake County**](http://www.lakecountyil.gov/154/Chief-County-Assessment-Office)
-  * [**McHenry County**](http://www.mchenrycountygis.org/Athena/#)
+  * [**McHenry County**](http://www.mchenrycountygis.org/Athena)
   * [**Will County**](https://www.willcountysoa.com/section/Property-Search-Portal)
   
   If your property is in a different county, search online to find your county's Recorder of Deeds website and see if you can look up your PIN for free online.
@@ -844,91 +840,77 @@ buttons:
   - Exit: exit
   - Restart: restart
 ---
-id: first witnessing
+id: first witness known
 question: |
-  Do you know who your first witness will be?
+  Do you know who will be your first witness?
 subquestion: |
   You will need to have two witnesses sign the TODI with you in front of a notary public. You don't need to know who your witnesses will be right now, but you will need to add their names and addresses later.
   
   Your beneficiaries cannot serve as witnesses.
 fields:
-  - no label: first_witness.known
+  - no label: first_witness_known
     datatype: yesnoradio
 ---
-id: second witnessing
+id: second witness known
 question: |
-  Do you know who your second witness will be?
+  Do you know who will be your second witness?
 subquestion: |
   You will need to have two witnesses sign the TODI with you in front of a notary public. You don't need to know who your witnesses will be right now, but you will need to add their names and addresses later.
-  
+  % if first_witness_known == True:
+  You said ${witnesses[0].name.full(middle="full") } will be your other witness. Your beneficiaries cannot serve as witnesses.
+  % else:
   Your beneficiaries cannot serve as witnesses.
+  % endif
 fields:
-  - no label: second_witness.known
+  - no label: second_witness_known
     datatype: yesnoradio
 ---
-id: first witness name
-question: |
-  What is the name of your first witness?
-fields:
-  - First: first_witness.name.first
-  - Middle: first_witness.name.middle
-    required: False
-  - Last: first_witness.name.last  
+code: |
+  if first_witness_known == False:
+    second_witness_known = False
 ---
-id: second witness name
+id: witness name
 question: |
-  What is the name of your second witness?
+  What is the name of your ${ ordinal(i) } witness?
 fields:
-  - First: second_witness.name.first
-  - Middle: second_witness.name.middle
+  - First: witnesses[i].name.first
+  - Middle: witnesses[i].name.middle
     required: False
-  - Last: second_witness.name.last  
+  - Last: witnesses[i].name.last  
 ---
-id: first address known
+id: address known
 question: |
-  Do you know ${first_witness.name.full(middle="full") }'s address?
+  Do you know ${witnesses[0].name.full(middle="full") }'s address?
 subquestion: |
-  If you do not know this now, you can add it when ${first_witness.name.full(middle="full") } signs the TODI as your witness.
+  If you do not know this now, you can add it when ${witnesses[0].name.full(middle="full") } signs the TODI as your witness.
 fields:
-  - no label: first_witness.location_known
+  - no label: first_witness_address_known
     datatype: yesnoradio
 ---
 id: second address known
 question: |
-  Do you know ${second_witness.name.full(middle="full") }'s address?
+  Do you know ${witnesses[1].name.full(middle="full") }'s address?
 subquestion: |
-  If you do not know this now, you can add it when ${second_witness.name.full(middle="full") } signs the TODI as your witness.
+  If you do not know this now, you can add it when ${witnesses[1].name.full(middle="full") } signs the TODI as your witness.
 fields:
-  - no label: second_witness.location_known
+  - no label: second_witness_address_known
     datatype: yesnoradio
----
-id: first witness address
-question: |
-  What is ${first_witness.name.full(middle="full") }'s address?
-fields:
-  - Street address: first_witness.address.address
-    address autocomplete: True
-  - Address line 2: first_witness.address.unit
-    required: False
-  - City: first_witness.address.city
-  - State: first_witness.address.state
-    code: |
-      states_list() 
-  - ZIP code: first_witness.address.zip
 ---
 id: witness address
 question: |
-  What is ${second_witness.name.full(middle="full") }'s address?
+  What is ${witnesses[i].name.full(middle="full") }'s address?
+subquestion: |
+  If you do not know this now, click **Back**.
 fields:
-  - Street address: second_witness.address.address
+  - Street address: witnesses[i].address.address
     address autocomplete: True
-  - Address line 2: second_witness.address.unit
+  - Address line 2: witnesses[i].address.unit
     required: False
-  - City: second_witness.address.city
-  - State: second_witness.address.state
+  - City: witnesses[i].address.city
+  - State: witnesses[i].address.state
     code: |
       states_list() 
-  - ZIP code: second_witness.address.zip
+  - ZIP code: witnesses[i].address.zip
 ---
 id: get docs screen
 event: get_docs_screen
@@ -1076,45 +1058,44 @@ review:
       **Beneficiaries' tenancy:**
         ${tenancy_type}
     show if: beneficiary_count  != 1
-  - Edit: first_witness.known
+  - Edit: first_witness_known
     button: |
       **Do you know who will be the first witness?**
-      ${word(yesno(first_witness.known))}
-  - Edit: first_witness.name.first
+      ${word(yesno(first_witness_known))}
+  - Edit: witnesses[0].name.first
     button: |
       **First witness's name:**
-      ${first_witness.name.full(middle='full')}
-    show if: first_witness.known
-  - Edit: first_witness.location_known
+      ${witnesses[0].name.full(middle='full')}
+    show if: first_witness_known
+  - Edit: first_witness_address_known
     button: |
-      **Do you know ${first_witness.name.full(middle='full')}'s address?**
-      ${word(yesno(first_witness.location_known))}
-    show if: first_witness.known
-  - Edit: first_witness.address.address
+      **Do you know ${witnesses[0].name.full(middle='full')}'s address?**
+      ${word(yesno(first_witness_address_known))}
+    show if: first_witness_known
+  - Edit: witnesses[0].address.address
     button: |
-      **${first_witness.name.full(middle='full')}'s address:**
-      ${first_witness.address.on_one_line(bare=True)}
-    show if: first_witness.location_known
-  - Edit: second_witness.known
+      **${witnesses[0].name.full(middle='full')}'s address:**
+      ${witnesses[0].address.on_one_line(bare=True)}
+    show if: first_witness_known == True and first_witness_address_known == True 
+  - Edit: second_witness_known
     button: |
       **Do you know who will be the second witness?**
-      ${word(yesno(second_witness.known))}
-    show if: first_witness.known
-  - Edit: second_witness.name.first
+      ${word(yesno(second_witness_known))}
+  - Edit: witnesses[1].name.first
     button: |
       **Second witness's name:**
-      ${second_witness.name.full(middle='full')}
-    show if: first_witness.known == True and second_witness.known == True
-  - Edit: second_witness.location_known
+      ${witnesses[1].name.full(middle='full')}
+    show if: second_witness_known == True
+  - Edit: second_witness_address_known
     button: |
-      **Do you know ${second_witness.name.full(middle='full')}'s address?**
-      ${word(yesno(second_witness.location_known))}
-    show if: first_witness.known == True and second_witness.known == True
-  - Edit: second_witness.address.address
+      **Do you know ${witnesses[1].name.full(middle='full')}'s address?**
+      ${word(yesno(second_witness_address_known))}
+    show if: second_witness_known == True
+  - Edit: witnesses[1].address.address
     button: |
-      **${second_witness.name.full(middle='full')}'s address:**
-      ${second_witness.address.on_one_line(bare=True)}
-    show if: second_witness.known == True and second_witness.location_known == True
+      **${witnesses[1].name.full(middle='full')}'s address:**
+      ${witnesses[1].address.on_one_line(bare=True)}
+    show if: second_witness_known == True and second_witness_address_known == True
 ---
 id: beneficiaries review
 continue button field: beneficiaries.revisit
@@ -1133,20 +1114,6 @@ columns:
       row_item.name.full(middle="full") if defined("row_item.name.first") else ""
   - Address, phone number, relationship, share, and successor: |
       action_button_html(url_action(row_item.attr_name("review_beneficiary")), label="Edit", icon="pencil-alt")
-  #- Share: |
-      #row_item.percent_share if defined("row_item.percent_share") else ""
-  #- Address: |
-      #row_item.address.on_one_line(bare=True) if defined("row_item.address.address") else ""
-  #- Relationship to you: |
-      #row_item.relationship if defined("row_item.relationship") else ""
-  #- Any successor?: |
-      #word(yesno(row_item.has_successor)) if defined("row_item.has_successor") else ""
-  #- Succesor name: |
-      #row_item.successor_beneficiary.name.full(middle='full') if defined("row_item.successor_beneficiary.name.first") else ""
-  #- Successor city: |
-      #row_item.successor_beneficiary.address.city if defined("row_item.successor_beneficiary.address.city") else ""
-  #- Successor state: |
-      #row_item.successor_beneficiary.address.state if defined("row_item.successor_beneficiary.address.state") else ""
 delete buttons: True
 confirm: True
 ---
@@ -1259,45 +1226,44 @@ question: |
 subquestion: |
   Edit your answers below.
 review:
-  - Edit: first_witness.known
+  - Edit: first_witness_known
     button: |
       **Do you know who will be the first witness?**
-      ${word(yesno(first_witness.known))}
-  - Edit: first_witness.name.first
+      ${word(yesno(first_witness_known))}
+  - Edit: witnesses[0].name.first
     button: |
       **First witness's name:**
-      ${first_witness.name.full(middle='full')}
-    show if: first_witness.known
-  - Edit: first_witness.location_known
+      ${witnesses[0].name.full(middle='full')}
+    show if: first_witness_known
+  - Edit: first_witness_address_known
     button: |
-      **Do you know ${first_witness.name.full(middle='full')}'s address?**
-      ${word(yesno(first_witness.location_known))}
-    show if: first_witness.known
-  - Edit: first_witness.address.address
+      **Do you know ${witnesses[0].name.full(middle='full')}'s address?**
+      ${word(yesno(first_witness_address_known))}
+    show if: first_witness_known
+  - Edit: witnesses[0].address.address
     button: |
-      **${first_witness.name.full(middle='full')}'s address:**
-      ${first_witness.address.on_one_line(bare=True)}
-    show if: first_witness.location_known
-  - Edit: second_witness.known
+      **${witnesses[0].name.full(middle='full')}'s address:**
+      ${witnesses[0].address.on_one_line(bare=True)}
+    show if: first_witness_known == True and first_witness_address_known == True 
+  - Edit: second_witness_known
     button: |
       **Do you know who will be the second witness?**
-      ${word(yesno(second_witness.known))}
-    show if: first_witness.known
-  - Edit: second_witness.name.first
+      ${word(yesno(second_witness_known))}
+  - Edit: witnesses[1].name.first
     button: |
       **Second witness's name:**
-      ${second_witness.name.full(middle='full')}
-    show if: first_witness.known == True and second_witness.known == True
-  - Edit: second_witness.location_known
+      ${witnesses[1].name.full(middle='full')}
+    show if: second_witness_known == True
+  - Edit: second_witness_address_known
     button: |
-      **Do you know ${second_witness.name.full(middle='full')}'s address?**
-      ${word(yesno(second_witness.location_known))}
-    show if: first_witness.known == True and second_witness.known == True
-  - Edit: second_witness.address.address
+      **Do you know ${witnesses[1].name.full(middle='full')}'s address?**
+      ${word(yesno(second_witness_address_known))}
+    show if: second_witness_known == True
+  - Edit: witnesses[1].address.address
     button: |
-      **${second_witness.name.full(middle='full')}'s address:**
-      ${second_witness.address.on_one_line(bare=True)}
-    show if: second_witness.known == True and second_witness.location_known == True
+      **${witnesses[1].name.full(middle='full')}'s address:**
+      ${witnesses[1].address.on_one_line(bare=True)}
+    show if: second_witness_known == True and second_witness_address_known == True
 ---
 id: beneficiary review
 continue button field: x.review_beneficiary
