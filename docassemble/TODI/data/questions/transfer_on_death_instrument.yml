@@ -52,6 +52,7 @@ code: |
   nav.set_section('section_user')
   user.name.first
   user.address.address
+  user_county_edit
   if user.include_phone == True:
     user.phone_number
   if user.include_email == True:
@@ -85,6 +86,7 @@ code: |
       witnesses[1].name.first
       if second_witness_address_known == True:
         witnesses[1].address.address
+  set_second_witness_unknown
   nav.set_section('section_download')
   if beneficiary_count  == 1:
     percent_default
@@ -288,6 +290,8 @@ subject: |
 content: |  
   You can use this **[City-to-County Finder](https://www.statsamerica.org/CityCountyFinder/)** to find the county.
 ---
+depends on:
+  - todi_property.county
 id: property county
 continue button field: property_county
 question: |
@@ -318,12 +322,35 @@ code: |
     return county_list
 ---
 depends on:
+  - user.address.county
+sets:
+  - add_county
+code: |
+  user_county_name = user.address.county.lower()
+  
+  if user_county_name.endswith(" county"):
+    add_county = False
+  else:
+    add_county = True
+    
+---
+sets:
+  - user_county_edit
+code: |
+  if add_county == True:
+    user.address.county = user.address.county + " County"
+  user_county_edit = True
+---
+depends on:
   - trial_court_index
+  #- todi_property.county
 code: |
   county_name = todi_property.county.lower()
   
+  needs_addition = True
   if county_name.endswith(" county"):
     county_name = todi_property.county.lower()[0:-7]
+    needs_addition = False
 
   county_found = False
   for item in get_county_list():
@@ -336,8 +363,17 @@ code: |
       trial_court = court_list.as_court('trial_court', 15)
     else:
       trial_court = court_list.as_court('trial_court', trial_court_index)
-    todi_property.county = trial_court.address.county + " County" 
+    todi_property.county = trial_court.address.county + " County"  
+  else: 
+    if needs_addition == True:
+      todi_property.county = todi_property.county + " County"
   check_county = True
+---
+reset:
+  - check_county
+  - county_name
+  - county_found
+  #- trial_court
 ---
 depends on:
   - trial_court_index
@@ -865,9 +901,12 @@ fields:
   - no label: second_witness_known
     datatype: yesnoradio
 ---
+only sets: 
+  - set_second_witness_unknown
 code: |
   if first_witness_known == False:
     second_witness_known = False
+  set_second_witness_unknown = True
 ---
 id: witness name
 question: |
@@ -991,7 +1030,7 @@ review:
   - Edit: user.address.county
     button: |
       **Your County:**
-      ${user.address.county} County
+      ${user.address.county}
   - Edit: user.include_phone
     button: |
       **Do you want to include your phone number?**
@@ -1018,6 +1057,10 @@ review:
     button: |
       **Address of the property:**
       ${todi_property.on_one_line(bare=True)}
+  - Edit: todi_property.county
+    button: |
+      **Property location:**
+      ${todi_property.county}
   - Edit: 
       - trial_court_index
       - recompute:
@@ -1135,7 +1178,7 @@ review:
   - Edit: user.address.county
     button: |
       **Your County:**
-      ${user.address.county} County
+      ${user.address.county}
   - Edit: user.include_phone
     button: |
       **Do you want to include your phone number?**
@@ -1189,7 +1232,11 @@ review:
   - Edit: todi_property.address
     button: |
       **Address of the property:**
-      ${todi_property.on_one_line(bare=True)}
+      ${todi_property.on_one_line(bare=True)},
+  - Edit: todi_property.county
+    button: |
+      **Property location:**
+      ${todi_property.county}
   - Edit: 
       - trial_court_index
       - recompute:
