@@ -52,7 +52,7 @@ code: |
   nav.set_section('section_user')
   user.name.first
   user.address.address
-  user_county_edit
+  user.address.county_correct
   if user.include_phone == True:
     user.phone_number
   if user.include_email == True:
@@ -61,7 +61,7 @@ code: |
     married_note
   nav.set_section('section_property')
   todi_property.address
-  check_county
+  todi_property.county_correct
   todi_property.pin
   todi_property.description
   if other_owners_check == "multiple":   
@@ -284,105 +284,6 @@ fields:
   - ZIP code: todi_property.zip
   - County: todi_property.county
 ---
-template: county_lookup_help
-subject: |
-  **How do I look up the county?**
-content: |  
-  You can use this **[City-to-County Finder](https://www.statsamerica.org/CityCountyFinder/)** to find the county.
----
-depends on:
-  - todi_property.county
-id: property county
-continue button field: property_county
-question: |
-  In which county is the property located?
-subquestion: |
-  We could not find the county for the property at ${ todi_property.on_one_line(bare=True) } in the list of Illinois counties, but you can select it here.
-
-  ${ collapse_template(county_lookup_help) }
-fields:
-  - no label: trial_court_index
-    code: |
-      court_county_lookup()
----   
-code: |
-  def court_county_lookup(lowercase=False):
-    all_court_counties = court_list._load_courts()['address_county'].items()
-    filtered_courts = [(-1, "cook")] if lowercase else [(-1, "Cook")]
-    for court in all_court_counties:
-      if court[1] != "Cook":
-        court_name = court[1].lower() if lowercase else court[1]
-        filtered_courts.append((court[0],court_name))
-    return sorted( filtered_courts, key=lambda y: y[1])
----
-code: |
-  def get_county_list(lowercase=False):
-    county_list = [*set(court_list._load_courts()['address_county'])]
-    county_list.sort()
-    return county_list
----
-depends on:
-  - user.address.county
-sets:
-  - add_county
-code: |
-  user_county_name = user.address.county.lower()
-  
-  if user_county_name.endswith(" county"):
-    add_county = False
-  else:
-    add_county = True
-    
----
-sets:
-  - user_county_edit
-code: |
-  if add_county == True:
-    user.address.county = user.address.county + " County"
-  user_county_edit = True
----
-depends on:
-  - trial_court_index
-  #- todi_property.county
-code: |
-  county_name = todi_property.county.lower()
-  
-  needs_addition = True
-  if county_name.endswith(" county"):
-    county_name = todi_property.county.lower()[0:-7]
-    needs_addition = False
-
-  county_found = False
-  for item in get_county_list():
-    if county_name == str(item).lower():
-      county_found = True
-
-  if county_found == False:
-    trial_court_index
-    if trial_court_index == "-1":
-      trial_court = court_list.as_court('trial_court', 15)
-    else:
-      trial_court = court_list.as_court('trial_court', trial_court_index)
-    todi_property.county = trial_court.address.county + " County"  
-  else: 
-    if needs_addition == True:
-      todi_property.county = todi_property.county + " County"
-  check_county = True
----
-reset:
-  - check_county
-  - county_name
-  - county_found
-  #- trial_court
----
-depends on:
-  - trial_court_index
-code: |
-  if trial_court_index == "-1":
-    trial_court = court_list.as_court('trial_court', 15)
-  else:
-    trial_court = court_list.as_court('trial_court', trial_court_index)
----
 id: property pin
 question: |
   What is the Property Identification Number ("PIN") for this property? 
@@ -401,6 +302,7 @@ subquestion: |
   The format of a PIN is 12-12-123-123-1234.
 fields:
   - PIN: todi_property.pin
+    maxlength: 20
 ---
 id: property description
 question: |
@@ -422,6 +324,7 @@ fields:
   - Legal description: todi_property.description
     input type: area
     rows: 10
+    maxlength: 1200
 ---
 id: other owners check
 question: |
@@ -1023,14 +926,14 @@ review:
     button: |
       **Your name:**
       ${user.name.full(middle='full')}
-  - Edit: user.address.address
+  - label: Edit
+    fields:
+      - user.address.address
+      - recompute:
+        - user.address.county_correct
     button: |
       **Your address:**
-      ${user.address.on_one_line(bare=True)}
-  - Edit: user.address.county
-    button: |
-      **Your County:**
-      ${user.address.county}
+      ${user.address.on_one_line(bare=True)}, ${end_in_county(user.address.county)}
   - Edit: user.include_phone
     button: |
       **Do you want to include your phone number?**
@@ -1053,21 +956,14 @@ review:
     button: |
       **Your marital status:**
       ${user.marital_status}
-  - Edit: todi_property.address
+  - label: Edit
+    fields:
+      - todi_property.address
+      - recompute:
+        - todi_property.county_correct
     button: |
       **Address of the property:**
-      ${todi_property.on_one_line(bare=True)}
-  - Edit: todi_property.county
-    button: |
-      **Property location:**
-      ${todi_property.county}
-  - Edit: 
-      - trial_court_index
-      - recompute:
-        - trial_court
-    button: |
-      **Property location:**
-      ${ trial_court.address.county } County
+      ${todi_property.on_one_line(bare=True)}, ${end_in_county(todi_property.county)}
   - Edit: todi_property.pin
     button: |
       **Property Identification Number:**
@@ -1171,14 +1067,14 @@ review:
     button: |
       **Your name:**
       ${user.name.full(middle='full')}
-  - Edit: user.address.address
+  - label: Edit
+    fields:
+      - user.address.address
+      - recompute:
+        - user.address.county_correct
     button: |
       **Your address:**
-      ${user.address.on_one_line(bare=True)}
-  - Edit: user.address.county
-    button: |
-      **Your County:**
-      ${user.address.county}
+      ${user.address.on_one_line(bare=True)}, ${end_in_county(user.address.county)}
   - Edit: user.include_phone
     button: |
       **Do you want to include your phone number?**
@@ -1229,21 +1125,14 @@ question: |
 subquestion: |
   Edit your answers below.
 review:
-  - Edit: todi_property.address
+  - label: Edit
+    fields:
+      - todi_property.address
+      - recompute:
+        - todi_property.county_correct
     button: |
       **Address of the property:**
-      ${todi_property.on_one_line(bare=True)},
-  - Edit: todi_property.county
-    button: |
-      **Property location:**
-      ${todi_property.county}
-  - Edit: 
-      - trial_court_index
-      - recompute:
-        - trial_court
-    button: |
-      **Property location:**
-      ${ trial_court.address.county } County
+      ${todi_property.on_one_line(bare=True)}, ${end_in_county(todi_property.county)}
   - Edit: todi_property.pin
     button: |
       **Property Identification Number:**
