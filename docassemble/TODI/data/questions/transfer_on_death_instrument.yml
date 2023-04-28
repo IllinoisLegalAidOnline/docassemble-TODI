@@ -302,7 +302,7 @@ subquestion: |
   The format of a PIN is 12-12-123-123-1234.
 fields:
   - PIN: todi_property.pin
-    maxlength: 20
+    maxlength: 25
 ---
 id: property description
 question: |
@@ -324,7 +324,7 @@ fields:
   - Legal description: todi_property.description
     input type: area
     rows: 10
-    maxlength: 1200
+    maxlength: 1500
 ---
 id: other owners check
 question: |
