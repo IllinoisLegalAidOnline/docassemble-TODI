@@ -53,6 +53,7 @@ code: |
   user.name.first
   user.address.address
   user.address.county_correct
+  set_progress(20)
   if user.include_phone == True:
     user.phone_number
   if user.include_email == True:
@@ -63,6 +64,7 @@ code: |
   todi_property.address
   todi_property.county_correct
   todi_property.pin
+  set_progress(40)
   todi_property.description
   if other_owners_check == "multiple":   
     if shared_owners_type == "Tenancy in common":
@@ -74,7 +76,9 @@ code: |
     elif shared_owners_type == "I do not know":
       unknown_kickout
   nav.set_section('section_beneficiaries')
+  set_progress(60)
   beneficiaries.gather()
+  set_progress(80)
   share_calculator
   nav.set_section('section_witnesses')
   #reconsider('beneficiary_count')
@@ -90,6 +94,7 @@ code: |
   nav.set_section('section_download')
   if beneficiary_count  == 1:
     percent_default
+  set_progress(100)
   get_docs_screen
 ---
 id: welcome
@@ -112,7 +117,7 @@ question: |
 subquestion: |
   Set aside 10 to 20 minutes to finish this program. You can log in and save your work to return to later. 
 
-  After you download your form, you will need to sign it in front of 2 witnesses and a notary public, record the TODI with your county's Recorder of Deeds, and give copies to your beneficiaries.
+  After you download your form, you will need to sign and date it in front of 2 witnesses and a notary public, record the TODI with your county's Recorder of Deeds, and give copies to your beneficiaries.
   
   ${ collapse_template(help_example) }  
 
@@ -312,11 +317,11 @@ subquestion: |
 
   Note: Be careful in writing the property description. You should copy the legal description exactly. You may wish to compare the deed to other documents (such as a mortgage) to see if the descriptions are the same. If your property is in one of the counties listed below, click their website to look up the legal description.
 
-  * [**Cook County**](http://cookrecorder.com/"»Cook County Recorder of Deeds)
+  * [**Cook County**](http://cookrecorder.com/)
   * [**DuPage County**](https://www.dupagecounty.gov/elected_officials/recorder/)
   * [**Kane County**](https://lrs.kanecountyrecorder.net/)
   * [**Lake County**](https://www.lakecountyil.gov/258/Recorder-of-Deeds)
-  * [**McHenry County**](https://www.co.mchenry.il.us/county-government/departments-a-i/county-recorder)
+  * [**McHenry County**](https://www.mchenrycountyil.gov/departments/county-recorder/public-records-search-options)
   * [**Will County**](https://www.willcountysoa.com/section/Property-Search-Portal)
 
   If your property is in a different county, search online to find your county's Recorder of Deeds website and see if you can look up the legal description for free online.
@@ -623,7 +628,10 @@ subquestion: |
 depends on:
   - beneficiary_count
 code: |
-  equal_share_reference = 100 / beneficiaries.number_gathered()
+  if beneficiary_count != 3:
+    equal_share_reference = 100 / beneficiaries.number_gathered()
+  else:
+    equal_share_reference = 33.33
 ---
 code: |
   beneficiary_count = beneficiaries.number_gathered()
