@@ -79,6 +79,8 @@ code: |
   set_progress(60)
   beneficiaries.gather()
   set_progress(80)
+  if beneficiaries.number_gathered() == 0:
+    no_beneficiaries
   share_calculator
   nav.set_section('section_witnesses')
   #reconsider('beneficiary_count')
@@ -384,6 +386,19 @@ buttons:
   - Exit: exit
   - Restart: restart
 ---
+id: no beneficiaries
+event: no_beneficiaries
+question: |
+  No beneficiaries listed
+subquestion: |
+  You cannot complete this program without listing at least one beneficiary.
+  
+  Please click **Back** below or **Beneficiaries** on the left to add beneficiaries.
+  
+buttons:
+  - Exit: exit
+  - Restart: restart
+---
 id: any other beneficiaries
 question: |
   Do you have any other beneficiaries to tell us about?
@@ -607,7 +622,10 @@ depends on:
   - beneficiary_count
 code: |
   if beneficiary_count != 3:
-    equal_share_reference = 100 / beneficiaries.number_gathered()
+    if beneficiary_count == 0:
+      equal_share_reference = 100
+    else:
+      equal_share_reference = 100 / beneficiaries.number_gathered()
   else:
     equal_share_reference = 33.33
 ---
