@@ -13,13 +13,14 @@ include:
   - docassemble.ILAO:shared-basic-questions.yml
 ---
 objects:
-  - user: ALIndividual
+  - users: ALPeopleList.using(object_type=ALIndividual, complete_attribute=['complete'], there_are_any=True)
   - todi_property: ALAddress
   - ownership_types: DAList.using(there_are_any=True)
   - beneficiaries: ALPeopleList.using(object_type=ALIndividual, complete_attribute=['complete'], there_are_any=True)
   - beneficiaries[i].successor_beneficiary: ALIndividual
   - witnesses: ALPeopleList.using(there_are_any=True)
   - court_list: ALCourtLoader.using(file_name='docassemble.ILAO:data/sources/il_courts.xlsx')
+
 ---
 code: |
   ilao_easy_form_title = "Transfer on death instrument - TODI"
@@ -50,16 +51,17 @@ code: |
   if illinois_property == False:
     not_in_illinois
   nav.set_section('section_user')
-  user.name.first
-  user.address.address
-  user.address.county_correct
+  users[0].name.first
+  users[0].address.address
+  users[0].address.county_correct
   set_progress(20)
-  if user.include_phone == True:
-    user.phone_number
-  if user.include_email == True:
-    user.email
-  if user.marital_status == "Married":
+  if users[0].include_phone == True:
+    users[0].phone_number
+  if users[0].include_email == True:
+    users[0].email
+  if users[0].marital_status == "Married":
     married_note
+  users[0].complete = True
   nav.set_section('section_property')
   todi_property.address
   todi_property.county_correct
@@ -69,10 +71,18 @@ code: |
   if other_owners_check == "multiple":   
     if shared_owners_type == "Tenancy in common":
       common_explanation
-    elif shared_owners_type == "Joint tenancy":
-      joint_explanation
-    elif shared_owners_type == "Tenancy by the entirety":
-      entirety_explanation
+    elif shared_owners_type == "Joint tenancy" or shared_owners_type == "Tenancy by the entirety":
+      if joint_todi_check == True:
+        joint_todi_info
+        users[1].name.first
+        users[1].address.address
+        users[1].address.county_correct
+        if users[1].include_phone == True:
+          users[1].phone_number
+        if users[1].include_email == True:
+          users[1].email
+        co_owner_marital_check
+        users[1].complete = True
     elif shared_owners_type == "I do not know":
       unknown_kickout
   nav.set_section('section_beneficiaries')
@@ -97,7 +107,50 @@ code: |
   if beneficiary_count  == 1:
     percent_default
   set_progress(100)
+  no_more_users
   get_docs_screen
+---
+depends on:
+  - other_owners_check
+  - shared_owners_type
+  - joint_todi_check
+code: |
+  if other_owners_check != "multiple":
+    joint_language = False
+  elif shared_owners_type != "Tenancy in common":
+    if joint_todi_check == True:
+      joint_language = True
+    else:
+      joint_language = False
+  else:
+    joint_language = False
+    
+  if joint_language == True:
+    me_or_us = "us"
+    i_or_we = "we"
+    my_or_our = "our"
+    owners_apostrophe = "owners'"
+    death_or_deaths = "deaths"
+    owner_or_owners = "owners"
+    person_or_persons = "persons"
+    name_is_or_names_are = "names are"
+    TAX_WORD = "TAXPAYERS"
+  else:
+    me_or_us = "me"
+    i_or_we = "I"
+    my_or_our = "my"
+    owners_apostrophe = "owner's"
+    death_or_deaths = "death"
+    owner_or_owners = "owner"
+    person_or_persons = "person"
+    name_is_or_names_are = "name is"
+    TAX_WORD = "TAXPAYER"
+---
+depends on:
+  - joint_todi_check
+code: |
+  users.there_is_another = False
+  no_more_users = True
 ---
 id: welcome
 question: |
@@ -177,10 +230,10 @@ id: user name
 question: |
   What is your name?
 fields:
-  - First: user.name.first
-  - Middle: user.name.middle
+  - First: users[0].name.first
+  - Middle: users[0].name.middle
     required: False
-  - Last: user.name.last
+  - Last: users[0].name.last
 ---
 id: user address
 question: |
@@ -188,43 +241,43 @@ question: |
 subquestion: |
   This does not have to be the address of the property you're transferring.
 fields:
-  - Street address: user.address.address
+  - Street address: users[0].address.address
     address autocomplete: True
-  - Address line 2: user.address.unit
+  - Address line 2: users[0].address.unit
     required: False
-  - City: user.address.city
-  - State: user.address.state
+  - City: users[0].address.city
+  - State: users[0].address.state
     code: |
       states_list() 
-  - ZIP code: user.address.zip
-  - County: user.address.county
+  - ZIP code: users[0].address.zip
+  - County: users[0].address.county
 ---
 id: user phone check
 question: |
   Do you want to include your phone number in the TODI?
 fields:
-  - no label: user.include_phone
+  - no label: users[0].include_phone
     datatype: yesnoradio
 ---
 id: user phone number
 question: |
   What is your phone number?
 fields:
-  - Phone number: user.phone_number
+  - Phone number: users[0].phone_number
     datatype: al_international_phone
 ---
 id: user email check
 question: |
   Do you want to include your email address in the TODI?
 fields:
-  - no label: user.include_email
+  - no label: users[0].include_email
     datatype: yesnoradio
 ---
 id: user email address
 question: |
   What is your email address?
 fields: 
-  - Email: user.email
+  - Email: users[0].email
     datatype: email
 ---
 id: user marital status
@@ -232,7 +285,7 @@ question: |
   What is your marital status?
 subquestion: |
   If you are married, your marriage may affect ownership of the property.
-field: user.marital_status
+field: users[0].marital_status
 choices:
   - Single
   - Married
@@ -322,9 +375,9 @@ choices:
 sets:
   - ownership_types[i]
 depends on:
-  - user.marital_status
+  - users[0].marital_status
 code: |
-  if user.marital_status == "Married":
+  if users[0].marital_status == "Married":
     ownership_types = [
       {"Tenancy in common": "Tenancy in common",
         "help": "**Tenants in common** may have equal or unequal shares. For example, one owner could own an 80% share of the property and another owner could own a 20% share of the property. These percentages must add up to 100%. Tenant-in-common owners do not have the right of survivorship. If a tenant in common passes away, their share of the property goes to their estate instead of the remaining tenants in common."},
@@ -358,15 +411,64 @@ question: |
 subquestion: |
   As you are a **tenant in common**, you and the other owners must make separate TODIs. Your TODI will transfer your share of the property to your beneficiaries.
 ---
-id: joint tenant explanation
-continue button field: joint_explanation
+id: joint todi check
 question: |
-  Joint tenancy
+  % if shared_owners_type == "Joint Tenancy":
+  Are you making this TODI on your own or with another owner?
+  % elif shared_owners_type == "Tenancy by the entirety":
+  Are you making this TODI on your own or with your spouse?
+  % else:
+  Error: This question should not appear with shared_owners_type set to ${shared_owners_type}.
+  % endif
 subquestion: |
-  As you are a **joint tenant** owner, you and the other owners could file a TODI together. However, this program can only make a TODI for a single owner.
+  % if shared_owners_type == "Joint Tenancy":
+  As you are a **joint tenant** owner, you and the other owners can file a TODI together.
   
-  You and the other owners can each file your own TODIs, but only the TODI of the owner who passes away last would take effect.
+  If you file a TODI on your own and you are not the last owner to pass away your TODI will not take effect.
+  
+  If you and the other owners file a TODI together, the last surviving owner could decide to revoke the TODI.
+  
+  This program can make a joint TODI for a property with two owners: you and your joint owner. It cannot make a joint TODI for a property with three or more owners. If the property is owned by three or more people, you may file separate TODIs or [**Get Legal Help**]("https://www.illinoislegalaid.org/get-legal-help").
+  % elif shared_owners_type == "Tenancy by the entirety":
+  As you and your spouse are **tenants in the entirety**, you could file a TODI together if you both agree who should get the home after you both pass away.
+  
+  If you and your spouse do not agree about who would get the home after you both pass away, you can each file your own TODIs. Only the TODI of the owner who passes away last would take effect.
+  
+  If you and your spouse file a TODI together and your spouse outlives you, they could decide to revoke the TODI.
+  
+  If you have more questions or concerns, you may want to [**Get Legal Help**]("https://www.illinoislegalaid.org/get-legal-help").
+  % endif
+field: joint_todi_check
+choices:
+  - We are making a TODI together: True
+  - I am making a TODI alone: False
 ---
+id: joint todi info
+continue button field: joint_todi_info
+question: |
+  Making a TODI together
+subquestion: |
+  % if shared_owners_type == "Tenancy by the entirety":
+  If you and your spouse make a joint TODI together, you must agree on the answers to all of the questions in this interview. If you do not agree, do not make a joint TODI together.
+  
+  A joint TODI does not bind a joint owner. If one of the two of you passes away, the other can revoke the TODI or sell the property while they are still alive. This is because the last living joint tenant owner of a property owns that property in full.
+  
+  You will both need to sign the TODI in the presence of witnesses.
+  
+  If you have questions or concerns, you may want to [**Get Legal Help**]("https://www.illinoislegalaid.org/get-legal-help").
+  % elif shared_owners_type == "Joint Tenancy":
+  If you and the other owner make a joint TODI together, you must agree on the answers to all of the questions in this interview. If you do not agree, do not make a joint TODI together.
+  
+  A joint TODI does not bind a joint owner. If one of the two of you passes away, the other can revoke the TODI or sell the property while they are still alive. This is because the last living joint tenant owner of a property owns that property in full.
+  
+  You will both need to sign the TODI in the presence of witnesses.
+  
+  If you have questions or concerns, you may want to [**Get Legal Help**]("https://www.illinoislegalaid.org/get-legal-help").
+  % else:
+  Logic error. There is likely an issue with either the shared_owners_type variable or this question block.
+  % endif
+---
+#No longer called. Delete after completing joint TODI functionality.
 id: tenant entirety explanation
 continue button field: entirety_explanation
 question: |
@@ -385,6 +487,86 @@ subquestion: |
 buttons:
   - Exit: exit
   - Restart: restart
+---
+id: joint owner name
+question: |
+  % if shared_owners_type == "Tenancy by the entirety":
+  What is your spouse's name?
+  % else:
+  What is the other owner's name?
+  % endif
+fields:
+  - First: users[1].name.first
+  - Middle: users[1].name.middle
+    required: False
+  - Last: users[1].name.last
+---
+id: joint owner address
+question: |
+  What is ${users[1].name.full(middle='full')}'s mailing address?
+fields:
+  - Street address: users[1].address.address
+    address autocomplete: True
+  - Address line 2: users[1].address.unit
+    required: False
+  - City: users[1].address.city
+  - State: users[1].address.state
+    code: |
+      states_list() 
+  - ZIP code: users[1].address.zip
+  - County: users[1].address.county
+---
+id: joint owner phone check
+question: |
+  Do you want to include ${users[1].name.full(middle='full')}'s phone number in the TODI?
+fields:
+  - no label: users[1].include_phone
+    datatype: yesnoradio
+---
+id: joint owner phone number
+question: |
+  What is ${users[1].name.full(middle='full')}'s phone number?
+fields:
+  - Phone number: users[1].phone_number
+    datatype: al_international_phone
+---
+id: joint owner email check
+question: |
+  Do you want to include ${users[1].name.full(middle='full')}'s email address in the TODI?
+fields:
+  - no label: users[1].include_email
+    datatype: yesnoradio
+---
+id: joint owner email address
+question: |
+  What is ${users[1].name.full(middle='full')}'s email address?
+fields: 
+  - Email: users[1].email
+    datatype: email
+---
+depends on:
+  - shared_owners_type
+code: |
+  if shared_owners_type == "Tenancy by the entirety":
+    users[1].marital_status = "Married"
+  else:
+    users[1].marital_status
+  co_owner_marital_check = True
+---
+id: joint owner marital status
+question: |
+  What is ${users[1].name.full(middle='full')}'s marital status?
+subquestion: |
+  If they are married, their marriage may affect ownership of the property.
+field: users[1].marital_status
+choices:
+  - Single
+  - Married
+  - Legally separated by a judge: Legally separated by a judge
+    help: |
+      A legal separation is a court-ordered arrangement for a married couple to live separately and separate their assets. If ${users[1].name.full(middle='full')} lives apart from their spouse but were not separated by a judge, they are still considered married.
+  - Divorced
+  - Widowed
 ---
 id: no beneficiaries
 event: no_beneficiaries
@@ -926,40 +1108,40 @@ question: |
 subquestion: |
   Edit your answers below.
 review: 
-  - Edit: user.name.first
+  - Edit: users[0].name.first
     button: |
       **Your name:**
-      ${user.name.full(middle='full')}
+      ${users[0].name.full(middle='full')}
   - label: Edit
     fields:
-      - user.address.address
+      - users[0].address.address
       - recompute:
-        - user.address.county_correct
+        - users[0].address.county_correct
     button: |
       **Your address:**
-      ${user.address.on_one_line(bare=True)}, ${end_in_county(user.address.county)}
-  - Edit: user.include_phone
+      ${users[0].address.on_one_line(bare=True)}, ${end_in_county(users[0].address.county)}
+  - Edit: users[0].include_phone
     button: |
       **Do you want to include your phone number?**
-      ${word(yesno(user.include_phone))}
-  - Edit: user.phone_number
+      ${word(yesno(users[0].include_phone))}
+  - Edit: users[0].phone_number
     button: |
       **Your phone number:**
-      ${phone_number_formatted(user.phone_number)}
-    show if: user.include_phone
-  - Edit: user.include_email
+      ${phone_number_formatted(users[0].phone_number)}
+    show if: users[0].include_phone
+  - Edit: users[0].include_email
     button: |
       **Do you want to include your email address?**
-      ${word(yesno(user.include_email))}
-  - Edit: user.email
+      ${word(yesno(users[0].include_email))}
+  - Edit: users[0].email
     button: |
       **Your email address:**
-      ${user.email}
-    show if: user.include_email
-  - Edit: user.marital_status
+      ${users[0].email}
+    show if: users[0].include_email
+  - Edit: users[0].marital_status
     button: |
       **Your marital status:**
-      ${user.marital_status}
+      ${users[0].marital_status}
   - label: Edit
     fields:
       - todi_property.address
@@ -989,6 +1171,58 @@ review:
       **Type of shared ownership:**
       ${shared_owners_type}
     show if: other_owners_check != "sole"
+  - Edit: joint_todi_check
+    button: |
+      % if shared_owners_type == "Tenancy by the entirety":
+      **Are you making a TODI with your spouse?**
+      % else:
+      **Are you making a TODI with your joint owner?**
+      % endif
+      ${word(yesno(joint_todi_check))}
+    show if: shared_owners_type == "Joint Tenancy" or shared_owners_type == "Tenancy by the entirety"
+  - Edit: users[1].name.first
+    button: |
+      % if shared_owners_type == "Tenancy by the entirety":
+      **Your spouse's name:**
+      % else:
+      **Your joint owner's name:**
+      % endif
+      ${users[1].name.full(middle='full')}
+    show if: joint_todi_check
+  - label: Edit
+    fields:
+      - users[1].address.address
+      - recompute:
+        - users[1].address.county_correct
+    button: |
+      **${users[1].name.full(middle='full')}'s address:**
+      ${users[1].address.on_one_line(bare=True)}, ${end_in_county(users[1].address.county)}
+    show if: joint_todi_check
+  - Edit: users[1].include_phone
+    button: |
+      **Do you want to include ${users[1].name.full(middle='full')}'s phone number?**
+      ${word(yesno(users[1].include_phone))}
+    show if: joint_todi_check
+  - Edit: users[1].phone_number
+    button: |
+      **${users[1].name.full(middle='full')}'s phone number:**
+      ${phone_number_formatted(users[1].phone_number)}
+    show if: users[1].include_phone == True and joint_todi_check == True
+  - Edit: users[1].include_email
+    button: |
+      **Do you want to include ${users[1].name.full(middle='full')}'s email address?**
+      ${word(yesno(users[1].include_email))}
+    show if: joint_todi_check
+  - Edit: users[1].email
+    button: |
+      **${users[1].name.full(middle='full')}'s email address:**
+      ${users[1].email}
+    show if: users[1].include_email == True and joint_todi_check == True
+  - Edit: users[1].marital_status
+    button: |
+      **${users[1].name.full(middle='full')}'s marital status:**
+      ${users[1].marital_status}
+    show if: joint_todi_check == True and shared_owners_type == "Joint Tenancy"
   - Edit: beneficiaries.revisit
     button: |
       **Beneficiaries: (Edit to change names, addresses, and successors)**
@@ -1067,40 +1301,92 @@ question: |
 subquestion: |
   Edit your answers below.
 review:
-  - Edit: user.name.first
+  - Edit: users[0].name.first
     button: |
       **Your name:**
-      ${user.name.full(middle='full')}
+      ${users[0].name.full(middle='full')}
   - label: Edit
     fields:
-      - user.address.address
+      - users[0].address.address
       - recompute:
-        - user.address.county_correct
+        - users[0].address.county_correct
     button: |
       **Your address:**
-      ${user.address.on_one_line(bare=True)}, ${end_in_county(user.address.county)}
-  - Edit: user.include_phone
+      ${users[0].address.on_one_line(bare=True)}, ${end_in_county(users[0].address.county)}
+  - Edit: users[0].include_phone
     button: |
       **Do you want to include your phone number?**
-      ${word(yesno(user.include_phone))}
-  - Edit: user.phone_number
+      ${word(yesno(users[0].include_phone))}
+  - Edit: users[0].phone_number
     button: |
       **Your phone number:**
-      ${phone_number_formatted(user.phone_number)}
-    show if: user.include_phone
-  - Edit: user.include_email
+      ${phone_number_formatted(users[0].phone_number)}
+    show if: users[0].include_phone
+  - Edit: users[0].include_email
     button: |
       **Do you want to include your email address?**
-      ${word(yesno(user.include_email))}
-  - Edit: user.email
+      ${word(yesno(users[0].include_email))}
+  - Edit: users[0].email
     button: |
       **Your email address:**
-      ${user.email}
-    show if: user.include_email
-  - Edit: user.marital_status
+      ${users[0].email}
+    show if: users[0].include_email
+  - Edit: users[0].marital_status
     button: |
       **Your marital status:**
-      ${user.marital_status}
+      ${users[0].marital_status}
+  - Edit: joint_todi_check
+    button: |
+      % if shared_owners_type == "Tenancy by the entirety":
+      **Are you making a TODI with your spouse?**
+      % else:
+      **Are you making a TODI with your joint owner?**
+      % endif
+      ${word(yesno(joint_todi_check))}
+    show if: shared_owners_type == "Joint Tenancy" or shared_owners_type == "Tenancy by the entirety"
+  - Edit: users[1].name.first
+    button: |
+      % if shared_owners_type == "Tenancy by the entirety":
+      **Your spouse's name:**
+      % else:
+      **Your joint owner's name:**
+      % endif
+      ${users[1].name.full(middle='full')}
+    show if: joint_todi_check
+  - label: Edit
+    fields:
+      - users[1].address.address
+      - recompute:
+        - users[1].address.county_correct
+    button: |
+      **${users[1].name.full(middle='full')}'s address:**
+      ${users[1].address.on_one_line(bare=True)}, ${end_in_county(users[1].address.county)}
+    show if: joint_todi_check
+  - Edit: users[1].include_phone
+    button: |
+      **Do you want to include ${users[1].name.full(middle='full')}'s phone number?**
+      ${word(yesno(users[1].include_phone))}
+    show if: joint_todi_check
+  - Edit: users[1].phone_number
+    button: |
+      **${users[1].name.full(middle='full')}'s phone number:**
+      ${phone_number_formatted(users[1].phone_number)}
+    show if: users[1].include_phone == True and joint_todi_check == True
+  - Edit: users[1].include_email
+    button: |
+      **Do you want to include ${users[1].name.full(middle='full')}'s email address?**
+      ${word(yesno(users[1].include_email))}
+    show if: joint_todi_check
+  - Edit: users[1].email
+    button: |
+      **${users[1].name.full(middle='full')}'s email address:**
+      ${users[1].email}
+    show if: users[1].include_email == True and joint_todi_check == True
+  - Edit: users[1].marital_status
+    button: |
+      **${users[1].name.full(middle='full')}'s marital status:**
+      ${users[1].marital_status}
+    show if: joint_todi_check == True and shared_owners_type == "Joint Tenancy"
 ---
 id: review beneficiaries
 event: section_beneficiaries
@@ -1158,6 +1444,58 @@ review:
       **Type of shared ownership:**
       ${shared_owners_type}
     show if: other_owners_check != "sole"
+  - Edit: joint_todi_check
+    button: |
+      % if shared_owners_type == "Tenancy by the entirety":
+      **Are you making a TODI with your spouse?**
+      % else:
+      **Are you making a TODI with your joint owner?**
+      % endif
+      ${word(yesno(joint_todi_check))}
+    show if: shared_owners_type == "Joint Tenancy" or shared_owners_type == "Tenancy by the entirety"
+  - Edit: users[1].name.first
+    button: |
+      % if shared_owners_type == "Tenancy by the entirety":
+      **Your spouse's name:**
+      % else:
+      **Your joint owner's name:**
+      % endif
+      ${users[1].name.full(middle='full')}
+    show if: joint_todi_check
+  - label: Edit
+    fields:
+      - users[1].address.address
+      - recompute:
+        - users[1].address.county_correct
+    button: |
+      **${users[1].name.full(middle='full')}'s address:**
+      ${users[1].address.on_one_line(bare=True)}, ${end_in_county(users[1].address.county)}
+    show if: joint_todi_check
+  - Edit: users[1].include_phone
+    button: |
+      **Do you want to include ${users[1].name.full(middle='full')}'s phone number?**
+      ${word(yesno(users[1].include_phone))}
+    show if: joint_todi_check
+  - Edit: users[1].phone_number
+    button: |
+      **${users[1].name.full(middle='full')}'s phone number:**
+      ${phone_number_formatted(users[1].phone_number)}
+    show if: users[1].include_phone == True and joint_todi_check == True
+  - Edit: users[1].include_email
+    button: |
+      **Do you want to include ${users[1].name.full(middle='full')}'s email address?**
+      ${word(yesno(users[1].include_email))}
+    show if: joint_todi_check
+  - Edit: users[1].email
+    button: |
+      **${users[1].name.full(middle='full')}'s email address:**
+      ${users[1].email}
+    show if: users[1].include_email == True and joint_todi_check == True
+  - Edit: users[1].marital_status
+    button: |
+      **${users[1].name.full(middle='full')}'s marital status:**
+      ${users[1].marital_status}
+    show if: joint_todi_check == True and shared_owners_type == "Joint Tenancy"
 ---
 id: review witnesses
 event: section_witnesses
@@ -1217,7 +1555,7 @@ review:
       ${ x.name.full(middle="full")  }
   - Edit: x.address.address
     button: |
-      **${ x.name.full(middle="full") }'s address: **
+      **${ x.name.full(middle="full") }'s address:**
       ${ x.address.on_one_line(bare=True) }
   - Edit: x.phone_number
     button: |
@@ -1251,3 +1589,4 @@ review:
       **${x.successor_beneficiary.name.full(middle='full')}'s relationship to you:**
       ${x.successor_beneficiary.relationship}
     show if: x.has_successor == True
+---
