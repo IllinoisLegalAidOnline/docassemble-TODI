@@ -13,11 +13,12 @@ include:
   - docassemble.ILAO:shared-basic-questions.yml
 ---
 objects:
-  - users: ALPeopleList.using(object_type=ALIndividual, complete_attribute=['complete'], there_are_any=True)
+  - users: ALPeopleList.using(object_type=ALIndividual, there_are_any=True)
   - todi_property: ALAddress
   - ownership_types: DAList.using(there_are_any=True)
   - beneficiaries: ALPeopleList.using(object_type=ALIndividual, complete_attribute=['complete'], there_are_any=True)
   - beneficiaries[i].successor_beneficiary: ALIndividual
+  - joint_owner: ALIndividual
   - witnesses: ALPeopleList.using(there_are_any=True)
   - court_list: ALCourtLoader.using(file_name='docassemble.ILAO:data/sources/il_courts.xlsx')
 
@@ -69,22 +70,23 @@ code: |
   set_progress(40)
   todi_property.description
   if other_owners_check == "multiple":   
-    if shared_owners_type == "Tenancy in common":
-      common_explanation
-    elif shared_owners_type == "Joint tenancy" or shared_owners_type == "Tenancy by the entirety":
+    if shared_owners_type == "Joint Tenancy" or shared_owners_type == "Tenancy by the entirety":
       if joint_todi_check == True:
         joint_todi_info
-        users[1].name.first
-        users[1].address.address
-        users[1].address.county_correct
-        if users[1].include_phone == True:
-          users[1].phone_number
-        if users[1].include_email == True:
-          users[1].email
+        joint_owner.name.first
+        joint_owner.address.address
+        joint_owner.address.county_correct
+        if joint_owner.include_phone == True:
+          joint_owner.phone_number
+        if joint_owner.include_email == True:
+          joint_owner.email
         co_owner_marital_check
-        users[1].complete = True
+        if joint_owner.marital_status == "Married" and shared_owners_type == "Joint Tenancy" and users[0].marital_status != "Married":
+          joint_married_note
     elif shared_owners_type == "I do not know":
       unknown_kickout
+    elif shared_owners_type == "Tenancy in common":
+      common_explanation
   nav.set_section('section_beneficiaries')
   set_progress(60)
   beneficiaries.gather()
@@ -107,7 +109,7 @@ code: |
   if beneficiary_count  == 1:
     percent_default
   set_progress(100)
-  no_more_users
+  user_list_logic
   get_docs_screen
 ---
 depends on:
@@ -135,6 +137,10 @@ code: |
     person_or_persons = "persons"
     name_is_or_names_are = "names are"
     TAX_WORD = "TAXPAYERS"
+    after_both_death = "the death of both owners"
+    after_one_death = "the second owner dies"
+    i_and_other = "I and the other owner"
+    either_owner = "either owner"
   else:
     me_or_us = "me"
     i_or_we = "I"
@@ -145,12 +151,27 @@ code: |
     person_or_persons = "person"
     name_is_or_names_are = "name is"
     TAX_WORD = "TAXPAYER"
+    after_both_death = "your death"
+    after_one_death = "your death"
+    i_and_other = "I"
+    either_owner = "you"
 ---
 depends on:
   - joint_todi_check
+  - shared_owners_type
+  - other_owners_check
 code: |
-  users.there_is_another = False
-  no_more_users = True
+  #if other_owners_check == "multiple":   
+    #if shared_owners_type == "Joint Tenancy" or shared_owners_type == "Tenancy by the entirety":
+      #if joint_todi_check == True:
+        #users.there_is_another = True
+      #else:
+        #users.there_is_another = False
+    #else:
+      #users.there_is_another = False
+  #else:
+    #users.there_is_another = False
+  user_list_logic = True
 ---
 id: welcome
 question: |
@@ -163,7 +184,17 @@ subquestion: |
   A TODI lets you to transfer real estate to your loved ones without including it in your will. This means your loved ones can avoid having to go to court to divide up your property after your death.
   
   The form you create can only be used in Illinois.
+  
+  ${collapse_template(multiple_owners_intro)}
 field: sees_nav_bar
+---
+template: multiple_owners_intro
+subject: |
+  **What if my property has multiple owners?**
+content: | 
+  This program can make a joint TODI for a property with two owners: you and your joint owner. 
+  
+  It cannot make a joint TODI for a property with three or more owners. If the property is owned by three or more people, you may file separate TODIs or [**Get Legal Help**](https://www.illinoislegalaid.org/get-legal-help).
 ---
 id: instructions
 continue button field: how_to_use
@@ -301,6 +332,20 @@ question: |
   Note about property for married people
 subquestion: |
   If your spouse outlives you they may be able to stop your TODI, even if you have been separated for a long time. If they stop the TODI, your spouse will receive a share of the property. 
+  
+  To learn more, read ILAO's articles about:
+  
+  * [**What happens when I die without a will?**](https://www.illinoislegalaid.org/legal-information/what-happens-when-i-die-without-will/)
+  * [**Giving someone your house when you die**](https://www.illinoislegalaid.org/legal-information/giving-someone-your-house-when-you-die)
+  * [**A will as a legal document to explain my wishes after I die**](https://www.illinoislegalaid.org/legal-information/will-legal-document-explain-my-wishes-after-i-die)
+---
+id: joint married note
+continue button field: joint_married_note
+question: |
+  Note about property for married people
+subquestion: |
+  If ${joint_owner.name.full(middle='full')}'s spouse outlives them their spouse may be able to stop the TODI, even if they have been separated for a long time. If they stop the TODI, they will receive a share of the property.
+  
   To learn more, read ILAO's articles about:
   
   * [**What happens when I die without a will?**](https://www.illinoislegalaid.org/legal-information/what-happens-when-i-die-without-will/)
@@ -440,8 +485,8 @@ subquestion: |
   % endif
 field: joint_todi_check
 choices:
-  - We are making a TODI together: True
-  - I am making a TODI alone: False
+  - We are making a TODI together.: True
+  - I am making a TODI alone.: False
 ---
 id: joint todi info
 continue button field: joint_todi_info
@@ -496,75 +541,77 @@ question: |
   What is the other owner's name?
   % endif
 fields:
-  - First: users[1].name.first
-  - Middle: users[1].name.middle
+  - First: joint_owner.name.first
+  - Middle: joint_owner.name.middle
     required: False
-  - Last: users[1].name.last
+  - Last: joint_owner.name.last
 ---
 id: joint owner address
 question: |
-  What is ${users[1].name.full(middle='full')}'s mailing address?
+  What is ${joint_owner.name.full(middle='full')}'s mailing address?
 fields:
-  - Street address: users[1].address.address
+  - Street address: joint_owner.address.address
     address autocomplete: True
-  - Address line 2: users[1].address.unit
+  - Address line 2: joint_owner.address.unit
     required: False
-  - City: users[1].address.city
-  - State: users[1].address.state
+  - City: joint_owner.address.city
+  - State: joint_owner.address.state
     code: |
       states_list() 
-  - ZIP code: users[1].address.zip
-  - County: users[1].address.county
+  - ZIP code: joint_owner.address.zip
+  - County: joint_owner.address.county
 ---
 id: joint owner phone check
 question: |
-  Do you want to include ${users[1].name.full(middle='full')}'s phone number in the TODI?
+  Do you want to include ${joint_owner.name.full(middle='full')}'s phone number in the TODI?
 fields:
-  - no label: users[1].include_phone
+  - no label: joint_owner.include_phone
     datatype: yesnoradio
 ---
 id: joint owner phone number
 question: |
-  What is ${users[1].name.full(middle='full')}'s phone number?
+  What is ${joint_owner.name.full(middle='full')}'s phone number?
 fields:
-  - Phone number: users[1].phone_number
+  - Phone number: joint_owner.phone_number
     datatype: al_international_phone
 ---
 id: joint owner email check
 question: |
-  Do you want to include ${users[1].name.full(middle='full')}'s email address in the TODI?
+  Do you want to include ${joint_owner.name.full(middle='full')}'s email address in the TODI?
 fields:
-  - no label: users[1].include_email
+  - no label: joint_owner.include_email
     datatype: yesnoradio
 ---
 id: joint owner email address
 question: |
-  What is ${users[1].name.full(middle='full')}'s email address?
+  What is ${joint_owner.name.full(middle='full')}'s email address?
 fields: 
-  - Email: users[1].email
+  - Email: joint_owner.email
     datatype: email
 ---
 depends on:
   - shared_owners_type
 code: |
   if shared_owners_type == "Tenancy by the entirety":
-    users[1].marital_status = "Married"
+    joint_owner.marital_status = "Married"
   else:
-    users[1].marital_status
+    joint_owner.marital_status = joint_owner.marital_status_ask
   co_owner_marital_check = True
 ---
+depends on:
+  - shared_owners_type
 id: joint owner marital status
 question: |
-  What is ${users[1].name.full(middle='full')}'s marital status?
+  What is ${joint_owner.name.full(middle='full')}'s marital status?
 subquestion: |
   If they are married, their marriage may affect ownership of the property.
-field: users[1].marital_status
+field: joint_owner.marital_status_ask
 choices:
   - Single
   - Married
   - Legally separated by a judge: Legally separated by a judge
     help: |
-      A legal separation is a court-ordered arrangement for a married couple to live separately and separate their assets. If ${users[1].name.full(middle='full')} lives apart from their spouse but were not separated by a judge, they are still considered married.
+      A legal separation is a court-ordered arrangement for a married couple to live separately and separate their assets. If ${joint_owner.name.full(middle='full')} lives apart from their spouse but were not separated by a judge, they are still considered married.
   - Divorced
   - Widowed
 ---
@@ -595,13 +642,28 @@ code: |
   beneficiaries[i].address.address
   if beneficiaries[i].benefits == True:
     benefits_explainer
-  beneficiaries[i].relationship
+  if joint_language == True:
+    if beneficiaries[i].related_to_who == "me" or beneficiaries[i].related_to_who == "both":
+      beneficiaries[i].relationship
+    if beneficiaries[i].related_to_who == "me" or beneficiaries[i].related_to_who == "both":
+      beneficiaries[i].joint_relationship
+  else:
+    beneficiaries[i].relationship
   if beneficiaries[i].has_successor == True:
     beneficiaries[i].successor_beneficiary.name.first
     beneficiaries[i].successor_beneficiary.address.city
-    beneficiaries[i].successor_beneficiary.relationship
+    if joint_language == True:
+      if beneficiaries[i].successor_beneficiary.related_to_who == "me" or beneficiaries[i].successor_beneficiary.related_to_who == "both":
+        beneficiaries[i].successor_beneficiary.relationship
+      if beneficiaries[i].successor_beneficiary.related_to_who == "me" or beneficiaries[i].successor_beneficiary.related_to_who == "both":
+        beneficiaries[i].successor_beneficiary.joint_relationship
+    else:
+      beneficiaries[i].successor_beneficiary.relationship
+    beneficiaries[i].successor_beneficiary.relationship_info
   elif beneficiaries[i].relationship == "Child":
     child_notice
+  beneficiaries[i].relationship_info
+  beneficiaries[i].successor_beneficiary.show_successor_relationship
   beneficiaries[i].complete = True 
 ---
 sets:
@@ -639,6 +701,32 @@ fields:
       states_list() 
   - ZIP code: beneficiaries[i].address.zip  
 ---
+id: beneficiary related to who
+question: |
+  Is ${beneficiaries[i].name.full(middle='full')} related to you, ${joint_owner.name.full(middle='full')}, or both?
+subquestion: |
+  ${beneficiaries[i].name.full(middle='full')} does not have to be a family member. Their relationship to you or ${joint_owner.name.full(middle='full')} could be "friend."
+fields:
+  - no label: beneficiaries[i].related_to_who
+    input type: radio
+    choices:
+    - They are related to me.: me
+    - They are related to ${joint_owner.name.full(middle='full')}.: joint owner
+    - They are related to both of us.: both
+---
+id: successor related to who
+question: |
+  Is ${beneficiaries[i].successor_beneficiary.name.full(middle='full')} related to you, ${joint_owner.name.full(middle='full')}, or both?
+subquestion: |
+  ${beneficiaries[i].successor_beneficiary.name.full(middle='full')} does not have to be a family member. Their relationship to you or ${joint_owner.name.full(middle='full')} could be "friend."
+fields:
+  - no label: beneficiaries[i].successor_beneficiary.related_to_who
+    input type: radio
+    choices:
+    - They are related to me.: me
+    - They are related to ${joint_owner.name.full(middle='full')}.: joint owner
+    - They are related to both of us.: both
+---
 id: beneficiary relationship
 sets:
   - beneficiaries[i].relationship
@@ -666,6 +754,76 @@ depends on:
 code: |
   if beneficiaries[i].relationship_radio != "Other":
     beneficiaries[i].relationship = beneficiaries[i].relationship_radio 
+---
+id: beneficiary joint owner relationship
+sets:
+  - beneficiaries[i].joint_relationship
+question: |
+  What is ${beneficiaries[i].name.full(middle='full')}'s relationship to ${joint_owner.name.full(middle='full')}?
+fields: 
+  - Relationship: beneficiaries[i].joint_relationship_radio
+    input type: radio
+    choices:
+    - Parent
+    - Child
+    - Grandchild
+    - Sibling
+    - Cousin
+    - Other
+  - Other: beneficiaries[i].joint_relationship
+    show if: 
+      variable: beneficiaries[i].joint_relationship_radio
+      is: "Other"     
+---
+sets:
+  beneficiaries[i].joint_relationship
+depends on:
+  - beneficiaries[i].joint_relationship_radio
+code: |
+  if beneficiaries[i].joint_relationship_radio != "Other":
+    beneficiaries[i].joint_relationship = beneficiaries[i].joint_relationship_radio 
+---
+depends on:
+  - joint_language
+  - beneficiaries[i].relationship
+  - beneficiaries[i].related_to_who
+  - beneficiaries[i].joint_relationship
+  - users[0].name
+  - joint_owner.name
+code: |
+  if joint_language == False:
+    beneficiaries[i].relationship_info = beneficiaries[i].relationship
+  else:
+    if beneficiaries[i].related_to_who == "me":
+      beneficiaries[i].relationship_info = beneficiaries[i].relationship + " of " + users[0].name.full(middle='full')
+    elif beneficiaries[i].related_to_who == "joint owner":
+      beneficiaries[i].relationship_info = beneficiaries[i].joint_relationship + " of " + joint_owner.name.full(middle='full')
+    elif beneficiaries[i].related_to_who == "both":
+      if beneficiaries[i].relationship == beneficiaries[i].joint_relationship:
+        beneficiaries[i].relationship_info = beneficiaries[i].relationship + " of " + users[0].name.full(middle='full') + " and " + joint_owner.name.full(middle='full')
+      else:
+        beneficiaries[i].relationship_info = beneficiaries[i].relationship + " of " + users[0].name.full(middle='full') + " and " + beneficiaries[i].joint_relationship + " of " + joint_owner.name.full(middle='full')
+---
+depends on:
+  - joint_language
+  - beneficiaries[i].successor_beneficiary.relationship
+  - beneficiaries[i].successor_beneficiary.related_to_who
+  - beneficiaries[i].successor_beneficiary.joint_relationship
+  - users[0].name
+  - joint_owner.name
+code: |
+  if joint_language == False:
+    beneficiaries[i].successor_beneficiary.relationship_info = beneficiaries[i].successor_beneficiary.relationship
+  else:
+    if beneficiaries[i].successor_beneficiary.related_to_who == "me":
+      beneficiaries[i].successor_beneficiary.relationship_info = beneficiaries[i].successor_beneficiary.relationship + " of " + users[0].name.full(middle='full')
+    elif beneficiaries[i].successor_beneficiary.related_to_who == "joint owner":
+      beneficiaries[i].successor_beneficiary.relationship_info = beneficiaries[i].successor_beneficiary.joint_relationship + " of " + joint_owner.name.full(middle='full')
+    elif beneficiaries[i].successor_beneficiary.related_to_who == "both":
+      if beneficiaries[i].successor_beneficiary.relationship == beneficiaries[i].successor_beneficiary.joint_relationship:
+        beneficiaries[i].successor_beneficiary.relationship_info = beneficiaries[i].successor_beneficiary.relationship + " of " + users[0].name.full(middle='full') + " and " + joint_owner.name.full(middle='full')
+      else:
+        beneficiaries[i].successor_beneficiary.relationship_info = beneficiaries[i].successor_beneficiary.relationship + " of " + users[0].name.full(middle='full') + " and " + beneficiaries[i].successor_beneficiary.joint_relationship + " of " + joint_owner.name.full(middle='full')
 ---
 id: beneficiary benefits
 question: |
@@ -746,6 +904,34 @@ fields:
   - State: beneficiaries[i].successor_beneficiary.address.state
     code: |
       states_list() 
+---
+
+---
+id: successor joint relationship
+question: |
+  What is ${beneficiaries[i].successor_beneficiary.name.full(middle='full')}'s relationship to ${joint_owner.name.full(middle='full')}?
+fields: 
+  - Relationship: beneficiaries[i].successor_beneficiary.joint_relationship_radio
+    input type: radio
+    choices:
+    - Parent
+    - Child
+    - Grandchild
+    - Sibling
+    - Cousin
+    - Other
+  - Other: beneficiaries[i].successor_beneficiary.joint_relationship
+    show if: 
+      variable: beneficiaries[i].successor_beneficiary.joint_relationship_radio
+      is: "Other"
+---
+sets:
+  beneficiaries[i].successor_beneficiary.joint_relationship
+depends on:
+  - beneficiaries[i].successor_beneficiary.joint_relationship_radio
+code: |
+  if beneficiaries[i].successor_beneficiary.joint_relationship_radio != "Other":
+    beneficiaries[i].successor_beneficiary.joint_relationship = beneficiaries[i].successor_beneficiary.joint_relationship_radio 
 ---
 id: successor relationship
 question: |
@@ -1180,48 +1366,52 @@ review:
       % endif
       ${word(yesno(joint_todi_check))}
     show if: shared_owners_type == "Joint Tenancy" or shared_owners_type == "Tenancy by the entirety"
-  - Edit: users[1].name.first
+  - Edit: joint_owner.name.first
     button: |
       % if shared_owners_type == "Tenancy by the entirety":
       **Your spouse's name:**
       % else:
       **Your joint owner's name:**
       % endif
-      ${users[1].name.full(middle='full')}
+      ${joint_owner.name.full(middle='full')}
     show if: joint_todi_check
   - label: Edit
     fields:
-      - users[1].address.address
+      - joint_owner.address.address
       - recompute:
-        - users[1].address.county_correct
+        - joint_owner.address.county_correct
     button: |
-      **${users[1].name.full(middle='full')}'s address:**
-      ${users[1].address.on_one_line(bare=True)}, ${end_in_county(users[1].address.county)}
+      **${joint_owner.full(middle='full')}'s address:**
+      ${joint_owner.address.on_one_line(bare=True)}, ${end_in_county(joint_owner.address.county)}
     show if: joint_todi_check
-  - Edit: users[1].include_phone
+  - Edit: joint_owner.include_phone
     button: |
-      **Do you want to include ${users[1].name.full(middle='full')}'s phone number?**
-      ${word(yesno(users[1].include_phone))}
+      **Do you want to include ${joint_owner.name.full(middle='full')}'s phone number?**
+      ${word(yesno(joint_owner.include_phone))}
     show if: joint_todi_check
-  - Edit: users[1].phone_number
+  - Edit: joint_owner.phone_number
     button: |
-      **${users[1].name.full(middle='full')}'s phone number:**
-      ${phone_number_formatted(users[1].phone_number)}
-    show if: users[1].include_phone == True and joint_todi_check == True
-  - Edit: users[1].include_email
+      **${joint_owner.name.full(middle='full')}'s phone number:**
+      ${phone_number_formatted(joint_owner.phone_number)}
+    show if: joint_owner.include_phone == True and joint_todi_check == True
+  - Edit: joint_owner.include_email
     button: |
-      **Do you want to include ${users[1].name.full(middle='full')}'s email address?**
-      ${word(yesno(users[1].include_email))}
+      **Do you want to include ${joint_owner.name.full(middle='full')}'s email address?**
+      ${word(yesno(joint_owner.include_email))}
     show if: joint_todi_check
-  - Edit: users[1].email
+  - Edit: joint_owner.email
     button: |
-      **${users[1].name.full(middle='full')}'s email address:**
-      ${users[1].email}
-    show if: users[1].include_email == True and joint_todi_check == True
-  - Edit: users[1].marital_status
+      **${joint_owner.name.full(middle='full')}'s email address:**
+      ${joint_owner.email}
+    show if: joint_owner.include_email == True and joint_todi_check == True
+  - label: Edit
+    fields:
+      - joint_owner.marital_status_ask
+      - recompute:
+        - co_owner_marital_check
     button: |
-      **${users[1].name.full(middle='full')}'s marital status:**
-      ${users[1].marital_status}
+      **${joint_owner.name.full(middle='full')}'s marital status:**
+      ${joint_owner.marital_status}
     show if: joint_todi_check == True and shared_owners_type == "Joint Tenancy"
   - Edit: beneficiaries.revisit
     button: |
@@ -1344,48 +1534,52 @@ review:
       % endif
       ${word(yesno(joint_todi_check))}
     show if: shared_owners_type == "Joint Tenancy" or shared_owners_type == "Tenancy by the entirety"
-  - Edit: users[1].name.first
+  - Edit: joint_owner.name.first
     button: |
       % if shared_owners_type == "Tenancy by the entirety":
       **Your spouse's name:**
       % else:
       **Your joint owner's name:**
       % endif
-      ${users[1].name.full(middle='full')}
+      ${joint_owner.name.full(middle='full')}
     show if: joint_todi_check
   - label: Edit
     fields:
-      - users[1].address.address
+      - joint_owner.address.address
       - recompute:
-        - users[1].address.county_correct
+        - joint_owner.address.county_correct
     button: |
-      **${users[1].name.full(middle='full')}'s address:**
-      ${users[1].address.on_one_line(bare=True)}, ${end_in_county(users[1].address.county)}
+      **${joint_owner.name.full(middle='full')}'s address:**
+      ${joint_owner.address.on_one_line(bare=True)}, ${end_in_county(joint_owner.address.county)}
     show if: joint_todi_check
-  - Edit: users[1].include_phone
+  - Edit: joint_owner.include_phone
     button: |
-      **Do you want to include ${users[1].name.full(middle='full')}'s phone number?**
-      ${word(yesno(users[1].include_phone))}
+      **Do you want to include ${joint_owner.name.full(middle='full')}'s phone number?**
+      ${word(yesno(joint_owner.include_phone))}
     show if: joint_todi_check
-  - Edit: users[1].phone_number
+  - Edit: joint_owner.phone_number
     button: |
-      **${users[1].name.full(middle='full')}'s phone number:**
-      ${phone_number_formatted(users[1].phone_number)}
-    show if: users[1].include_phone == True and joint_todi_check == True
-  - Edit: users[1].include_email
+      **${joint_owner.name.full(middle='full')}'s phone number:**
+      ${phone_number_formatted(joint_owner.phone_number)}
+    show if: joint_owner.include_phone == True and joint_todi_check == True
+  - Edit: joint_owner.include_email
     button: |
-      **Do you want to include ${users[1].name.full(middle='full')}'s email address?**
-      ${word(yesno(users[1].include_email))}
+      **Do you want to include ${joint_owner.name.full(middle='full')}'s email address?**
+      ${word(yesno(joint_owner.include_email))}
     show if: joint_todi_check
-  - Edit: users[1].email
+  - Edit: joint_owner.email
     button: |
-      **${users[1].name.full(middle='full')}'s email address:**
-      ${users[1].email}
-    show if: users[1].include_email == True and joint_todi_check == True
-  - Edit: users[1].marital_status
+      **${joint_owner.name.full(middle='full')}'s email address:**
+      ${joint_owner.email}
+    show if: joint_owner.include_email == True and joint_todi_check == True
+  - label: Edit
+    fields:
+      - joint_owner.marital_status_ask
+      - recompute:
+        - co_owner_marital_check
     button: |
-      **${users[1].name.full(middle='full')}'s marital status:**
-      ${users[1].marital_status}
+      **${joint_owner.name.full(middle='full')}'s marital status:**
+      ${joint_owner.marital_status}
     show if: joint_todi_check == True and shared_owners_type == "Joint Tenancy"
 ---
 id: review beneficiaries
@@ -1453,48 +1647,52 @@ review:
       % endif
       ${word(yesno(joint_todi_check))}
     show if: shared_owners_type == "Joint Tenancy" or shared_owners_type == "Tenancy by the entirety"
-  - Edit: users[1].name.first
+  - Edit: joint_owner.name.first
     button: |
       % if shared_owners_type == "Tenancy by the entirety":
       **Your spouse's name:**
       % else:
       **Your joint owner's name:**
       % endif
-      ${users[1].name.full(middle='full')}
+      ${joint_owner.name.full(middle='full')}
     show if: joint_todi_check
   - label: Edit
     fields:
-      - users[1].address.address
+      - joint_owner.address.address
       - recompute:
-        - users[1].address.county_correct
+        - joint_owner.address.county_correct
     button: |
-      **${users[1].name.full(middle='full')}'s address:**
-      ${users[1].address.on_one_line(bare=True)}, ${end_in_county(users[1].address.county)}
+      **${joint_owner.name.full(middle='full')}'s address:**
+      ${joint_owner.address.on_one_line(bare=True)}, ${end_in_county(joint_owner.address.county)}
     show if: joint_todi_check
-  - Edit: users[1].include_phone
+  - Edit: joint_owner.include_phone
     button: |
-      **Do you want to include ${users[1].name.full(middle='full')}'s phone number?**
-      ${word(yesno(users[1].include_phone))}
+      **Do you want to include ${joint_owner.name.full(middle='full')}'s phone number?**
+      ${word(yesno(joint_owner.include_phone))}
     show if: joint_todi_check
-  - Edit: users[1].phone_number
+  - Edit: joint_owner.phone_number
     button: |
-      **${users[1].name.full(middle='full')}'s phone number:**
-      ${phone_number_formatted(users[1].phone_number)}
-    show if: users[1].include_phone == True and joint_todi_check == True
-  - Edit: users[1].include_email
+      **${joint_owner.name.full(middle='full')}'s phone number:**
+      ${phone_number_formatted(joint_owner.phone_number)}
+    show if: joint_owner.include_phone == True and joint_todi_check == True
+  - Edit: joint_owner.include_email
     button: |
-      **Do you want to include ${users[1].name.full(middle='full')}'s email address?**
-      ${word(yesno(users[1].include_email))}
+      **Do you want to include ${joint_owner.name.full(middle='full')}'s email address?**
+      ${word(yesno(joint_owner.include_email))}
     show if: joint_todi_check
-  - Edit: users[1].email
+  - Edit: joint_owner.email
     button: |
-      **${users[1].name.full(middle='full')}'s email address:**
-      ${users[1].email}
-    show if: users[1].include_email == True and joint_todi_check == True
-  - Edit: users[1].marital_status
+      **${joint_owner.name.full(middle='full')}'s email address:**
+      ${joint_owner.email}
+    show if: joint_owner.include_email == True and joint_todi_check == True
+  - label: Edit
+    fields:
+      - joint_owner.marital_status_ask
+      - recompute:
+        - co_owner_marital_check
     button: |
-      **${users[1].name.full(middle='full')}'s marital status:**
-      ${users[1].marital_status}
+      **${joint_owner.name.full(middle='full')}'s marital status:**
+      ${joint_owner.marital_status}
     show if: joint_todi_check == True and shared_owners_type == "Joint Tenancy"
 ---
 id: review witnesses
@@ -1561,10 +1759,41 @@ review:
     button: |
       **${ x.name.full(middle="full") }'s phone number:**
       ${ phone_number_formatted(x.phone_number) }
-  - Edit: x.relationship
+  - label: Edit
+    fields: 
+      - x.related_to_who
+      - recompute:
+        - x.relationship_info
+    button: |
+      **Who is ${x.name.full(middle='full')} related to?**
+      % if x.related_to_who == "me":
+      ${users[0].name.full(middle='full')}
+      % elif x.related_to_who == "joint owner":
+      ${joint_owner.name.full(middle='full')}
+      % elif x.related_to_who == "both":
+      Both ${users[0].name.full(middle='full')} and ${joint_owner.name.full(middle='full')}
+      % endif
+    show if: joint_language
+  - label: Edit 
+    fields: 
+      - x.relationship_radio
+      - recompute:
+        - x.relationship
+        - x.relationship_info
     button: |
       **${x.name.full(middle='full')}'s relationship to you:**
       ${x.relationship}
+    show if: joint_language == False or x.related_to_who != "joint owner"
+  - label: Edit
+    fields:
+      - x.joint_relationship_radio
+      - recompute:
+        - x.joint_relationship
+        - x.relationship_info
+    button: |
+      **${x.name.full(middle='full')}'s relationship to ${joint_owner.name.full(middle='full')}:**
+      ${x.joint_relationship}
+    show if: joint_language == True and x.related_to_who != "me"
   - Edit: x.percent_share
     button: |
       **${ x.name.full(middle="full") }'s share of the property:**
@@ -1584,9 +1813,55 @@ review:
       **${x.successor_beneficiary.name.full(middle='full')}'s location:**
       ${x.successor_beneficiary.address.city}, ${x.successor_beneficiary.address.state}
     show if: x.has_successor == True
-  - Edit: x.successor_beneficiary.relationship
+  - label: Edit
+    fields: 
+      - x.successor_beneficiary.related_to_who
+      - recompute:
+        - x.successor_beneficiary.relationship_info
+    button: |
+      **Who is ${x.successor_beneficiary.name.full(middle='full')} related to?**
+      % if x.successor_beneficiary.related_to_who == "me":
+      ${users[0].name.full(middle='full')}
+      % elif x.successor_beneficiary.related_to_who == "joint owner":
+      ${joint_owner.name.full(middle='full')}
+      % elif x.successor_beneficiary.related_to_who == "both":
+      Both ${users[0].name.full(middle='full')} and ${joint_owner.name.full(middle='full')}
+      % endif
+    show if: joint_language == True and x.has_successor == True
+  - label: Edit 
+    fields: 
+      - x.successor_beneficiary.relationship_radio
+      - recompute:
+        - x.successor_beneficiary.relationship
+        - x.successor_beneficiary.relationship_info
     button: |
       **${x.successor_beneficiary.name.full(middle='full')}'s relationship to you:**
       ${x.successor_beneficiary.relationship}
-    show if: x.has_successor == True
+    show if: x.successor_beneficiary.show_successor_relationship
+  - label: Edit
+    fields:
+      - x.successor_beneficiary.joint_relationship_radio
+      - recompute:
+        - x.successor_beneficiary.joint_relationship
+        - x.successor_beneficiary.relationship_info
+    button: |
+      **${x.successor_beneficiary.name.full(middle='full')}'s relationship to ${joint_owner.name.full(middle='full')}:**
+      ${x.successor_beneficiary.joint_relationship}
+    show if: joint_language == True and x.successor_beneficiary.related_to_who != "me" and x.has_successor == True
 ---
+#This code block exists slowly to determine whether the successor beneficiary user relationship button is shown in the review screen. There is probably a more efficient way to do this, but sometimes I am a fool.
+depends on:
+  - joint_language
+  - x.has_successor
+  - x.successor_beneficiary.related_to_who
+code: |
+  if x.has_successor == True: 
+    if joint_language == False:
+      x.successor_beneficiary.show_successor_relationship = True
+    else:
+      if x.successor_beneficiary.related_to_who == "joint owner":
+        x.successor_beneficiary.show_successor_relationship = False
+      else:
+        x.successor_beneficiary.show_successor_relationship = True
+  else:
+    x.successor_beneficiary.show_successor_relationship = False
