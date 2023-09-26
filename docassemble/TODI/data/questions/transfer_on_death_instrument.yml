@@ -87,6 +87,7 @@ code: |
       unknown_kickout
     elif shared_owners_type == "Tenancy in common":
       common_explanation
+      user_common_share
   nav.set_section('section_beneficiaries')
   set_progress(60)
   beneficiaries.gather()
@@ -454,7 +455,20 @@ continue button field: common_explanation
 question: |
   Tenancy in common
 subquestion: |
-  As you are a **tenant in common**, you and the other owners must make separate TODIs. Your TODI will transfer your share of the property to your beneficiaries.
+  As you are a **tenant in common**, you and the other owners could make a TODI together. However, this program does not make a shared TODI for **tenants in common**. If you would like to make a TODI with your co-owners, you may want to [**Get Legal Help**]("https://www.illinoislegalaid.org/get-legal-help").
+  
+  If you continue using this program, your TODI will transfer your share of the property to your beneficiaries.
+---
+id: user commmon share
+question: |
+  What pecentage of the property do you own?
+subquestion: |
+  As a tenant in common, you own a specific percent share of the property.
+fields:
+  - Your percent share: user_common_share
+    datatype: number
+    min: 0.01
+    max: 99.99
 ---
 id: joint todi check
 question: |
@@ -663,7 +677,8 @@ code: |
   elif beneficiaries[i].relationship == "Child":
     child_notice
   beneficiaries[i].relationship_info
-  beneficiaries[i].successor_beneficiary.show_successor_relationship
+  #beneficiaries[i].successor_beneficiary.show_successor_relationship
+  beneficiaries[i].logic_for_successor_button
   beneficiaries[i].complete = True 
 ---
 sets:
@@ -1357,6 +1372,11 @@ review:
       **Type of shared ownership:**
       ${shared_owners_type}
     show if: other_owners_check != "sole"
+  - Edit: user_common_share
+    button: |
+      **Your share of the property:**
+      ${user_common_share}%
+    show if: other_owners_check != "sole" and shared_owners_type == "Tenancy in common"
   - Edit: joint_todi_check
     button: |
       % if shared_owners_type == "Tenancy by the entirety":
@@ -1484,6 +1504,7 @@ columns:
 delete buttons: True
 confirm: True
 ---
+section: About you
 id: review user
 event: section_user
 question: |
@@ -1582,6 +1603,7 @@ review:
       ${joint_owner.marital_status}
     show if: joint_todi_check == True and shared_owners_type == "Joint Tenancy"
 ---
+section: Beneficiaries
 id: review beneficiaries
 event: section_beneficiaries
 question: |
@@ -1602,6 +1624,7 @@ review:
         ${tenancy_type}
     show if: beneficiary_count  != 1
 ---
+section: Property
 id: review property
 event: section_property
 question: |
@@ -1638,6 +1661,11 @@ review:
       **Type of shared ownership:**
       ${shared_owners_type}
     show if: other_owners_check != "sole"
+  - Edit: user_common_share
+    button: |
+      **Your share of the property:**
+      ${user_common_share}%
+    show if: other_owners_check != "sole" and shared_owners_type == "Tenancy in common"
   - Edit: joint_todi_check
     button: |
       % if shared_owners_type == "Tenancy by the entirety":
@@ -1695,6 +1723,7 @@ review:
       ${joint_owner.marital_status}
     show if: joint_todi_check == True and shared_owners_type == "Joint Tenancy"
 ---
+section: Witnesses
 id: review witnesses
 event: section_witnesses
 question: |
@@ -1850,18 +1879,21 @@ review:
     show if: joint_language == True and x.successor_beneficiary.related_to_who != "me" and x.has_successor == True
 ---
 #This code block exists slowly to determine whether the successor beneficiary user relationship button is shown in the review screen. There is probably a more efficient way to do this, but sometimes I am a fool.
+sets:
+  - beneficiaries[i].logic_for_successor_button
 depends on:
   - joint_language
-  - x.has_successor
-  - x.successor_beneficiary.related_to_who
+  - beneficiaries[i].has_successor
+  - beneficiaries[i].successor_beneficiary.related_to_who
 code: |
-  if x.has_successor == True: 
+  if beneficiaries[i].has_successor == True: 
     if joint_language == False:
-      x.successor_beneficiary.show_successor_relationship = True
+      beneficiaries[i].successor_beneficiary.show_successor_relationship = True
     else:
-      if x.successor_beneficiary.related_to_who == "joint owner":
-        x.successor_beneficiary.show_successor_relationship = False
+      if beneficiaries[i].successor_beneficiary.related_to_who == "joint owner":
+        beneficiaries[i].successor_beneficiary.show_successor_relationship = False
       else:
-        x.successor_beneficiary.show_successor_relationship = True
+        beneficiaries[i].successor_beneficiary.show_successor_relationship = True
   else:
-    x.successor_beneficiary.show_successor_relationship = False
+    beneficiaries[i].successor_beneficiary.show_successor_relationship = False
+  beneficiaries[i].logic_for_successor_button = True
