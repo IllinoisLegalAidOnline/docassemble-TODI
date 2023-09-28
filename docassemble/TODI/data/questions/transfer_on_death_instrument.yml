@@ -690,6 +690,7 @@ subquestion: |
   % if i == 0:
   A beneficiary is the person you want to get your property or a share of your property after you pass away.
   % endif
+  ${collapse_template(living_trust_info)}
 fields:
   - First: beneficiaries[i].name.first
   - Middle: beneficiaries[i].name.middle
@@ -699,6 +700,14 @@ fields:
     code: |
       name_suffix()
     required: False  
+---
+template: living_trust_info
+subject: |
+  **What if I want a living trust to be my beneficiary?** 
+content: |
+  This program only makes TODIs that have individual people as beneficiaries. If you want to name a living trust as a beneficiary, you should talk to a lawyer.
+  
+  Use [**Get Legal Help**](https://www.illinoislegalaid.org/get-legal-help) to find free or low-cost legal services in your area.
 ---
 id: beneficiary address
 sets:
