@@ -140,7 +140,7 @@ code: |
     TAX_WORD = "TAXPAYERS"
     after_both_death = "the death of both owners"
     after_one_death = "the second owner dies"
-    i_and_other = "I and the other owner"
+    i_and_other = "the other owner and I"
     either_owner = "either owner"
   else:
     me_or_us = "me"
@@ -193,9 +193,9 @@ template: multiple_owners_intro
 subject: |
   **What if my property has multiple owners?**
 content: | 
-  This program can make a joint TODI for a property with two owners: you and your joint owner. 
+  This program can make a joint TODI for a property with two owners: you and your joint owner. The property must be held in **{joint tenancy}** or **{tenancy by the entirety}**.
   
-  It cannot make a joint TODI for a property with three or more owners. If the property is owned by three or more people, you may file separate TODIs or [**Get Legal Help**](https://www.illinoislegalaid.org/get-legal-help).
+  It cannot make a joint TODI for a property with three or more owners, or for a property owned by **{tenants in common}**. If the property is owned by three or more people, you may file separate TODIs or [**Get Legal Help**](https://www.illinoislegalaid.org/get-legal-help).
 ---
 id: instructions
 continue button field: how_to_use
@@ -426,8 +426,8 @@ code: |
   if users[0].marital_status == "Married":
     ownership_types = [
       {"Tenancy in common": "Tenancy in common",
-        "help": "**Tenants in common** may have equal or unequal shares. For example, one owner could own an 80% share of the property and another owner could own a 20% share of the property. These percentages must add up to 100%. Tenant-in-common owners do not have the right of survivorship. If a tenant in common passes away, their share of the property goes to their estate instead of the remaining tenants in common."},
-      {"Joint Tenancy": "Joint Tenancy",
+        "help": "**Tenants in common** may have equal or unequal shares. For example, one owner could own an 80% share of the property and another owner could own a 20% share of the property. These percentages must add up to 100%. Tenant-in-common owners do not have the right of survivorship. If a tenant in common passes away, their share of the property goes to their estate instead of the remaining tenants in common. If you use this program as a tenant in common, your beneficiaries will only inherit your share of the property."},
+      {"Joint Tenancy": "Joint tenancy",
         "help": "**Joint tenant** owners all own an equal share of the property. For example, if there are three joint tenant owners, each owner owns 1/3rd of the property. Joint tenant owners also have what the law calls a 'right of survivorship.' This means that when a joint tenant owner passes away, their share of the property goes to the other joint tenant owners."},
       {"Tenancy by the entirety": "Tenancy by the entirety",
         "help": "A **tenancy by the entirety** can only exist when a property is owned by a married couple. It is similar to a joint tenancy. If one spouse passes away, the other spouse gets their share of the property. The property's deed must explicitly state the couple owns the property as tenants by the entirety."},
@@ -435,8 +435,8 @@ code: |
   else:
     ownership_types = [
       {"Tenancy in common": "Tenancy in common",
-        "help": "**Tenants in common** may have equal or unequal shares. For example, one owner could own an 80% share of the property and another owner could own a 20% share of the property. These percentages must add up to 100%. Tenant-in-common owners do not have the right of survivorship. If a tenant in common passes away, their share of the property goes to their estate instead of the remaining tenants in common."},
-      {"Joint Tenancy": "Joint Tenancy",
+        "help": "**Tenants in common** may have equal or unequal shares. For example, one owner could own an 80% share of the property and another owner could own a 20% share of the property. These percentages must add up to 100%. Tenant-in-common owners do not have the right of survivorship. If a tenant in common passes away, their share of the property goes to their estate instead of the remaining tenants in common. If you use this program as a tenant in common, your beneficiaries will only inherit your share of the property."},
+      {"Joint Tenancy": "Joint tenancy",
         "help": "**Joint tenant** owners all own an equal share of the property. For example, if there are three joint tenant owners, each owner owns 1/3rd of the property. Joint tenant owners also have what the law calls a 'right of survivorship.' This means that when a joint tenant owner passes away, their share of the property goes to the other joint tenant owners."},
       {"I do not know": "I do not know."}]   
 ---
@@ -457,7 +457,7 @@ question: |
 subquestion: |
   As you are a **tenant in common**, you and the other owners could make a TODI together. However, this program does not make a shared TODI for **tenants in common**. If you would like to make a TODI with your co-owners, you may want to [**Get Legal Help**]("https://www.illinoislegalaid.org/get-legal-help").
   
-  If you continue using this program, your TODI will transfer your share of the property to your beneficiaries.
+  If you continue using this program, your TODI will transfer your share of the property and only your share of the property to your beneficiaries.
 ---
 id: user commmon share
 question: |
@@ -483,24 +483,24 @@ subquestion: |
   % if shared_owners_type == "Joint Tenancy":
   As you are a **joint tenant** owner, you and the other owners can file a TODI together.
   
-  If you file a TODI on your own and you are not the last owner to pass away your TODI will not take effect.
-  
   If you and the other owners file a TODI together, the last surviving owner could decide to revoke the TODI.
+  
+  If you file a TODI on your own and you are not the last owner to pass away your TODI will not take effect.
   
   This program can make a joint TODI for a property with two owners: you and your joint owner. It cannot make a joint TODI for a property with three or more owners. If the property is owned by three or more people, you may file separate TODIs or [**Get Legal Help**]("https://www.illinoislegalaid.org/get-legal-help").
   % elif shared_owners_type == "Tenancy by the entirety":
   As you and your spouse are **tenants in the entirety**, you could file a TODI together if you both agree who should get the home after you both pass away.
   
-  If you and your spouse do not agree about who would get the home after you both pass away, you can each file your own TODIs. Only the TODI of the owner who passes away last would take effect.
-  
   If you and your spouse file a TODI together and your spouse outlives you, they could decide to revoke the TODI.
+  
+  If you and your spouse do not agree about who would get the home after you both pass away, you can each file your own TODIs. Only the TODI of the owner who passes away last would take effect.
   
   If you have more questions or concerns, you may want to [**Get Legal Help**]("https://www.illinoislegalaid.org/get-legal-help").
   % endif
 field: joint_todi_check
 choices:
-  - We are making a TODI together.: True
-  - I am making a TODI alone.: False
+  - We are making a TODI together. I understand that the last surviving owner could revoke the TODI.: True
+  - I am making a TODI alone. I understand that if I am not the last owner to pass away, the TODI will not take effect.: False
 ---
 id: joint todi info
 continue button field: joint_todi_info
@@ -508,17 +508,17 @@ question: |
   Making a TODI together
 subquestion: |
   % if shared_owners_type == "Tenancy by the entirety":
-  If you and your spouse make a joint TODI together, you must agree on the answers to all of the questions in this interview. If you do not agree, do not make a joint TODI together.
+  If you and your spouse make a TODI together, you must agree on the answers to all of the questions in this interview. If you do not agree, do not make a shared TODI.
   
-  A joint TODI does not bind a joint owner. If one of the two of you passes away, the other can revoke the TODI or sell the property while they are still alive. This is because the last living joint tenant owner of a property owns that property in full.
+  A TODI does not bind a joint owner. If one of the two of you passes away, the other can revoke the TODI or sell the property while they are still alive. This is because the last living joint tenant owner of a property owns that property in full.
   
   You will both need to sign the TODI in the presence of witnesses.
   
   If you have questions or concerns, you may want to [**Get Legal Help**]("https://www.illinoislegalaid.org/get-legal-help").
   % elif shared_owners_type == "Joint Tenancy":
-  If you and the other owner make a joint TODI together, you must agree on the answers to all of the questions in this interview. If you do not agree, do not make a joint TODI together.
+  If you and the other owner make a TODI together, you must agree on the answers to all of the questions in this interview. If you do not agree, do not make a shared TODI.
   
-  A joint TODI does not bind a joint owner. If one of the two of you passes away, the other can revoke the TODI or sell the property while they are still alive. This is because the last living joint tenant owner of a property owns that property in full.
+  A TODI does not bind a joint owner. If one of the two of you passes away, the other can revoke the TODI or sell the property while they are still alive. This is because the last living joint tenant owner of a property owns that property in full.
   
   You will both need to sign the TODI in the presence of witnesses.
   
@@ -659,7 +659,7 @@ code: |
   if joint_language == True:
     if beneficiaries[i].related_to_who == "me" or beneficiaries[i].related_to_who == "both":
       beneficiaries[i].relationship
-    if beneficiaries[i].related_to_who == "me" or beneficiaries[i].related_to_who == "both":
+    if beneficiaries[i].related_to_who == "joint owner" or beneficiaries[i].related_to_who == "both":
       beneficiaries[i].joint_relationship
   else:
     beneficiaries[i].relationship
@@ -669,13 +669,24 @@ code: |
     if joint_language == True:
       if beneficiaries[i].successor_beneficiary.related_to_who == "me" or beneficiaries[i].successor_beneficiary.related_to_who == "both":
         beneficiaries[i].successor_beneficiary.relationship
-      if beneficiaries[i].successor_beneficiary.related_to_who == "me" or beneficiaries[i].successor_beneficiary.related_to_who == "both":
+      if beneficiaries[i].successor_beneficiary.related_to_who == "joint owner" or beneficiaries[i].successor_beneficiary.related_to_who == "both":
         beneficiaries[i].successor_beneficiary.joint_relationship
     else:
       beneficiaries[i].successor_beneficiary.relationship
     beneficiaries[i].successor_beneficiary.relationship_info
-  elif beneficiaries[i].relationship == "Child":
-    child_notice
+  elif joint_language == False:
+    if beneficiaries[i].relationship == "Child":
+      beneficiaries[i].child_notice
+  else:
+    if beneficiaries[i].related_to_who == "me":
+      if beneficiaries[i].relationship == "Child":
+        beneficiaries[i].child_notice
+    elif beneficiaries[i].related_to_who == "joint owner":
+      if beneficiaries[i].joint_relationship == "Child":
+        beneficiaries[i].child_notice
+    elif beneficiaries[i].related_to_who == "both":
+      if beneficiaries[i].relationship == "Child" or beneficiaries[i].joint_relationship == "Child":
+        beneficiaries[i].child_notice  
   beneficiaries[i].relationship_info
   #beneficiaries[i].successor_beneficiary.show_successor_relationship
   beneficiaries[i].logic_for_successor_button
@@ -688,7 +699,11 @@ question: |
   What is the ${ordinal(i)} beneficiary's name?
 subquestion: |
   % if i == 0:
+  % if joint_language == False:
   A beneficiary is the person you want to get your property or a share of your property after you pass away.
+  % else:
+  A beneficiary is the person you want to get your property or a share of your property after you and ${joint_owner.name.full(middle='full')} pass away.
+  % endif
   % endif
   ${collapse_template(living_trust_info)}
 fields:
@@ -875,21 +890,29 @@ id: successor beneficiary check
 question: |
   Would you like to name a successor beneficiary for ${beneficiaries[i].name.full(middle='full')}?
 subquestion: |
+  % if joint_language == False:
   A successor beneficiary is a loved one who will inherit the property if ${beneficiaries[i].name.full(middle='full')} passes away before you do.
   
   % if beneficiaries[i].relationship_radio == "Child":
   **Note:** If you do not name a successor beneficiary and your child passes away before you do, your child's share in your home will go to any surviving children of your child.
+  % endif
+  % else:
+  A successor beneficiary is a loved one who will inherit the property if ${beneficiaries[i].name.full(middle='full')} passes away before you and ${joint_owner.name.full(middle='full')} do.
   % endif
 fields:
   - no label: beneficiaries[i].has_successor
     datatype: yesnoradio 
 ---
 id: child notice
-continue button field: child_notice
+continue button field: beneficiaries[i].child_notice
 question: |
   Note about child beneficiaries
 subquestion: |
-   If you do not name a successor beneficiary and your child passes away before you do, your child's share in your home will go to any surviving children of your child.
+  % if joint_language == False:
+  If you do not name a successor beneficiary and ${beneficiaries[i].name.full(middle='full')} passes away before you do, their share of your home will go to their heirs.
+  % else:
+  If you do not name a successor beneficiary and ${beneficiaries[i].name.full(middle='full')} passes away before you or ${joint_owner.name.full(middle='full')} do, their share in your home will go to their heirs.
+  % endif
 ---
 id: probate warning
 continue button field: probate_warning
@@ -1145,6 +1168,10 @@ terms:
     **Joint tenant** owners all own an equal share of the property. For example, if there are three joint tenant owners, each owner owns 1/3rd of the property. Joint tenant owners also have what the law calls a right of survivorship. This means that when a joint tenant owner passes away, their share of the property goes to the other joint tenant owners.
   tenants in common: |
     **Tenants in common** may have equal or unequal shares. For example, one owner could own an 80% share of the property and another owner could own a 20% share of the property. These percentages must add up to 100%. Tenant-in-common owners do not have the right of survivorship. If a tenant in common passes away, their share of the property goes to their estate instead of the remaining tenants in common.
+  joint tenancy: |
+    **Joint tenant** owners all own an equal share of the property. For example, if there are three joint tenant owners, each owner owns 1/3rd of the property. Joint tenant owners also have what the law calls a 'right of survivorship.' This means that when a joint tenant owner passes away, their share of the property goes to the other joint tenant owners.
+  tenancy by the entirety: |
+    A **tenancy by the entirety** can only exist when a property is owned by a married couple. It is similar to a joint tenancy. If one spouse passes away, the other spouse gets their share of the property. The property's deed must explicitly state the couple owns the property as tenants by the entirety.
 ---
 id: percent error
 continue button field: percent_error
