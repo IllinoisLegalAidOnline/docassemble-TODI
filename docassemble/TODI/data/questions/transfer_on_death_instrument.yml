@@ -143,6 +143,7 @@ code: |
     after_one_death = "the second owner dies"
     i_and_other = "the other owner and I"
     either_owner = "either owner"
+    multiple_must_sign = "Both owners must sign"
   else:
     me_or_us = "me"
     i_or_we = "I"
@@ -157,6 +158,7 @@ code: |
     after_one_death = "your death"
     i_and_other = "I"
     either_owner = "you"
+    multiple_must_sign = "Sign"
 ---
 depends on:
   - joint_todi_check
@@ -746,12 +748,14 @@ sets:
   - beneficiaries[i].address.address
 question: |
   What is ${beneficiaries[i].name.full(middle='full')}'s address?
-subquestion: |
-  ${collapse_template(intl_info)}
+#subquestion: |
+#  ${collapse_template(intl_info)}
 fields:
   - Does ${beneficiaries[i].name.full(middle='full')} have a United States address?: beneficiaries[i].in_america
     datatype: yesnoradio
     default: True
+    help: |
+      You can list an international address for ${beneficiaries[i].name.full(middle='full')}. For international addresses, there will be space for two lines to enter the address. You should enter the international address using the English alphabet.
   - Street address: beneficiaries[i].address.address
     address autocomplete: True
     show if: beneficiaries[i].in_america
@@ -766,11 +770,11 @@ fields:
     show if: beneficiaries[i].in_america
   - ZIP code: beneficiaries[i].address.zip  
     show if: beneficiaries[i].in_america
-  - International address line 1: beneficiaries[i].intl_address_1
+  - International address line 1 (street address, apartment number): beneficiaries[i].intl_address_1
     show if: 
       variable: beneficiaries[i].in_america
       is: False
-  - International address line 2: beneficiaries[i].intl_address_2
+  - International address line 2 (city, province or state, postal code, country): beneficiaries[i].intl_address_2
     show if: 
       variable: beneficiaries[i].in_america
       is: False
@@ -1869,7 +1873,7 @@ review:
       % if x.in_america == True:
       ${ x.address.on_one_line(bare=True) }
       % else:
-      ${x.intl_address_1} ${x.intl_address_2}
+      ${x.intl_address_1}, ${x.intl_address_2}
       % endif
   - Edit: x.phone_number
     button: |
