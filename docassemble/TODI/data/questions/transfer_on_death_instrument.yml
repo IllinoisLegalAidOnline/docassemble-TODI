@@ -21,6 +21,7 @@ objects:
   - joint_owner: ALIndividual
   - witnesses: ALPeopleList.using(there_are_any=True)
   - court_list: ALCourtLoader.using(file_name='docassemble.ILAO:data/sources/il_courts.xlsx')
+  - test_intl_address: ALAddress
 
 ---
 code: |
@@ -173,6 +174,22 @@ code: |
   #else:
     #users.there_is_another = False
   user_list_logic = True
+---
+#sets:
+#  - test_intl_address.address
+#id: testing non-us addresses
+#question: |
+#  Insert address
+#fields:
+#  - code: |
+#      test_intl_address.address_fields(show_country=True)
+#---
+#id: show me
+#continue button field: show_me_the_test
+#question: |
+#  Hey, it's ${test_intl_address.on_one_line(show_country=True)}
+#subquestion: |
+#  Oh okay.
 ---
 id: welcome
 question: |
@@ -653,7 +670,7 @@ fields:
 ---
 code: |
   beneficiaries[i].name.first
-  beneficiaries[i].address.address
+  beneficiaries[i].in_america
   if beneficiaries[i].benefits == True:
     benefits_explainer
   if joint_language == True:
@@ -729,16 +746,40 @@ sets:
   - beneficiaries[i].address.address
 question: |
   What is ${beneficiaries[i].name.full(middle='full')}'s address?
+subquestion: |
+  ${collapse_template(intl_info)}
 fields:
+  - Does ${beneficiaries[i].name.full(middle='full')} have a United States address?: beneficiaries[i].in_america
+    datatype: yesnoradio
+    default: True
   - Street address: beneficiaries[i].address.address
     address autocomplete: True
+    show if: beneficiaries[i].in_america
   - Address line 2: beneficiaries[i].address.unit
     required: False
+    show if: beneficiaries[i].in_america
   - City: beneficiaries[i].address.city
+    show if: beneficiaries[i].in_america
   - State: beneficiaries[i].address.state
     code: |
       states_list() 
+    show if: beneficiaries[i].in_america
   - ZIP code: beneficiaries[i].address.zip  
+    show if: beneficiaries[i].in_america
+  - International address line 1: beneficiaries[i].intl_address_1
+    show if: 
+      variable: beneficiaries[i].in_america
+      is: False
+  - International address line 2: beneficiaries[i].intl_address_2
+    show if: 
+      variable: beneficiaries[i].in_america
+      is: False
+---
+template: intl_info
+subject: |
+  **What if ${beneficiaries[i].name.full(middle='full')} does not have a United States address?** 
+content: |
+  You can list an international address for ${beneficiaries[i].name.full(middle='full')}. For international addresses, there will be space for two lines to enter the address. You should enter the international address using the English alphabet.
 ---
 id: beneficiary related to who
 question: |
@@ -947,12 +988,18 @@ id: successor location
 question: |
   Where does ${beneficiaries[i].successor_beneficiary.name.full(middle='full')} live?
 fields:
+  - Does ${beneficiaries[i].successor_beneficiary.name.full(middle='full')} live in the United States?: beneficiaries[i].successor_beneficiary.in_america
+    datatype: yesnoradio
+    default: True
   - City: beneficiaries[i].successor_beneficiary.address.city
   - State: beneficiaries[i].successor_beneficiary.address.state
     code: |
       states_list() 
----
-
+    show if: beneficiaries[i].successor_beneficiary.in_america
+  - Country: beneficiaries[i].successor_beneficiary.country
+    show if:
+      variable: beneficiaries[i].successor_beneficiary.in_america
+      is: False
 ---
 id: successor joint relationship
 question: |
@@ -1816,10 +1863,14 @@ review:
     button: |
       **Beneficiary name:**
       ${ x.name.full(middle="full")  }
-  - Edit: x.address.address
+  - Edit: x.in_america
     button: |
       **${ x.name.full(middle="full") }'s address:**
+      % if x.in_america == True:
       ${ x.address.on_one_line(bare=True) }
+      % else:
+      ${x.intl_address_1} ${x.intl_address_2}
+      % endif
   - Edit: x.phone_number
     button: |
       **${ x.name.full(middle="full") }'s phone number:**
@@ -1876,7 +1927,11 @@ review:
   - Edit: x.successor_beneficiary.address.city
     button: |
       **${x.successor_beneficiary.name.full(middle='full')}'s location:**
+      % if x.successor_beneficiary.in_america == True:
       ${x.successor_beneficiary.address.city}, ${x.successor_beneficiary.address.state}
+      % else:
+      ${x.successor_beneficiary.address.city}, ${x.successor_beneficiary.country}
+      % endif
     show if: x.has_successor == True
   - label: Edit
     fields: 
