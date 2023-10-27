@@ -755,7 +755,7 @@ fields:
     datatype: yesnoradio
     default: True
     help: |
-      You can list an international address for ${beneficiaries[i].name.full(middle='full')}. For international addresses, there will be space for two lines to enter the address. You should enter the international address using the English alphabet.
+      Click **No** if you want to list an address outside the United States. For international addresses, there will be space for two lines to enter the address. You should enter the international address using the English alphabet.
   - Street address: beneficiaries[i].address.address
     address autocomplete: True
     show if: beneficiaries[i].in_america
@@ -770,11 +770,11 @@ fields:
     show if: beneficiaries[i].in_america
   - ZIP code: beneficiaries[i].address.zip  
     show if: beneficiaries[i].in_america
-  - International address line 1 (street address, apartment number): beneficiaries[i].intl_address_1
+  - Address line 1 (street address, apartment number): beneficiaries[i].intl_address_1
     show if: 
       variable: beneficiaries[i].in_america
       is: False
-  - International address line 2 (city, province or state, postal code, country): beneficiaries[i].intl_address_2
+  - Address line 2 (city, province or state, postal code, country): beneficiaries[i].intl_address_2
     show if: 
       variable: beneficiaries[i].in_america
       is: False
@@ -1120,9 +1120,10 @@ code: |
       even_split
     nested_share_code
   else:
-    if beneficiaries[0].relationship != "Child":
-      if beneficiaries[0].has_successor == False:
-        probate_warning
+    if joint_language == False:
+      if beneficiaries[0].relationship != "Child":
+        if beneficiaries[0].has_successor == False:
+          probate_warning
   share_calculator = True
 ---
 depends on:
