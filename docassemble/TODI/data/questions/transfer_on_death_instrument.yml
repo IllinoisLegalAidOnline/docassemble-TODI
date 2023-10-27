@@ -747,7 +747,7 @@ id: beneficiary address
 sets:
   - beneficiaries[i].address.address
 question: |
-  What is ${beneficiaries[i].name.full(middle='full')}'s address?
+  Enter ${beneficiaries[i].name.full(middle='full')}'s address
 #subquestion: |
 #  ${collapse_template(intl_info)}
 fields:
@@ -990,7 +990,7 @@ fields:
 ---
 id: successor location
 question: |
-  Where does ${beneficiaries[i].successor_beneficiary.name.full(middle='full')} live?
+  Enter ${beneficiaries[i].successor_beneficiary.name.full(middle='full')}'s location
 fields:
   - Does ${beneficiaries[i].successor_beneficiary.name.full(middle='full')} live in the United States?: beneficiaries[i].successor_beneficiary.in_america
     datatype: yesnoradio
@@ -1347,7 +1347,7 @@ subquestion: |
 
   ${ al_user_bundle.send_button_html(show_editable_checkbox=False) }
   
-  **Note:** This program does not send your form. You will need to do this yourself.
+  **Note:** You will have to record the TODI on your own after you sign and have it notarized.
 
   Thank you for using ILAO Easy Forms!
 under: |
