@@ -770,11 +770,11 @@ fields:
     show if: beneficiaries[i].in_america
   - ZIP code: beneficiaries[i].address.zip  
     show if: beneficiaries[i].in_america
-  - Non-U.S. address line 1 (street address, apartment number): beneficiaries[i].intl_address_1
+  - Non-US address line 1 (street address, apartment number): beneficiaries[i].intl_address_1
     show if: 
       variable: beneficiaries[i].in_america
       is: False
-  - Non-U.S. address line 2 (city, province or state, postal code, country): beneficiaries[i].intl_address_2
+  - Non-US address line 2 (city, province or state, postal code, country): beneficiaries[i].intl_address_2
     show if: 
       variable: beneficiaries[i].in_america
       is: False
