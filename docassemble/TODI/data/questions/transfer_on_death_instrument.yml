@@ -755,7 +755,7 @@ fields:
     datatype: yesnoradio
     default: True
     help: |
-      Click **No** if you want to list an address outside the United States. For international addresses, there will be space for two lines to enter the address. You should enter the international address using the English alphabet.
+      Click **No** if you want to list an address outside the United States. You should enter the international address using the English alphabet.
   - Street address: beneficiaries[i].address.address
     address autocomplete: True
     show if: beneficiaries[i].in_america
