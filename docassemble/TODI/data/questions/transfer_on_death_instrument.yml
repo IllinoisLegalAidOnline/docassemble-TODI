@@ -944,9 +944,19 @@ subquestion: |
   % else:
   A successor beneficiary is a loved one who will inherit the property if ${beneficiaries[i].name.full(middle='full')} passes away before you and ${joint_owner.name.full(middle='full')} do.
   % endif
+  
+  ${collapse_template(multiple_successor_note)}
 fields:
   - no label: beneficiaries[i].has_successor
     datatype: yesnoradio 
+---
+template: multiple_successor_note
+subject: |
+  **What if I want to list multiple successors for ${beneficiaries[i].name.full(middle='full')}?**
+content: | 
+  Listing more than one successor for a single beneficiary can raise complicated issues. This program can only list one successor for each beneficiary. If you want to make a TODI that names multiple successors for a single beneficiary, you should talk to a lawyer.
+  
+  Use [**Get Legal Help**](https://www.illinoislegalaid.org/get-legal-help) to find free or low-cost legal services in your area.
 ---
 id: child notice
 continue button field: beneficiaries[i].child_notice
