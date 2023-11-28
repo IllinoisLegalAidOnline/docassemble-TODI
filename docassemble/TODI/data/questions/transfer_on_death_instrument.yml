@@ -403,9 +403,19 @@ subquestion: |
   If your property is in a different county, search online to find your county's Recorder of Deeds website and see if you can look up your PIN for free online.
   
   The format of a PIN is 12-12-123-123-1234.
+  
+  ${collapse_template(multiple_pins)}
 fields:
   - PIN: todi_property.pin
-    maxlength: 25
+    maxlength: 40
+---
+template: multiple_pins
+subject: |
+  **What if my property has multiple PINs?** 
+content: |
+  If a property has two PINs but only one legal description, you may want to list both PINs in your answer. If the property has multiple PINs and multiple legal descriptions, you may need to make separate TODIs.
+  
+  When making a TODI, you should refer to the property the same way your deed refers to the property. If you do not know how you should refer to the property, you may want to [**Get Legal Help**]("https://www.illinoislegalaid.org/get-legal-help").
 ---
 id: property description
 question: |
