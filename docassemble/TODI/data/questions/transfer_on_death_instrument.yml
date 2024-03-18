@@ -1282,7 +1282,7 @@ subquestion: |
   
   If you click **Next**, this program will consider your beneficiaries **{joint tenants}** instead of **{tenants in common}**.
   
-  If you would like to edit the percentages, click **Back**.
+  If you would like to edit the percentages, click **Back** to go back or click **Beneficiaries** to edit your answers.
 ---
 #This kickout exists for when there is a percentage is but the ownership cannot be converted to a joint tenancy.
 id: percent kickout
@@ -1575,7 +1575,7 @@ review:
     button: |
       **Beneficiaries' tenancy:**
         ${tenancy_type}
-    show if: beneficiary_count  != 1
+    show if: beneficiaries.number_gathered() > 1
   - Edit: first_witness_known
     button: |
       **Do you know who will be the first witness?**
@@ -1753,7 +1753,7 @@ review:
     button: |
       **Beneficiaries' tenancy:**
         ${tenancy_type}
-    show if: beneficiary_count  != 1
+    show if: beneficiaries.number_gathered() > 1
 ---
 section: Property
 id: review property
@@ -1962,7 +1962,7 @@ review:
     button: |
       **${ x.name.full(middle="full") }'s share of the property:**
       ${x.percent_share}%
-    show if: beneficiary_count  > 1
+    show if: beneficiaries.number_gathered() > 1
   - Edit: x.has_successor
     button: |
       **Does ${x.name.full(middle='full')} have a successor beneficiary?**
