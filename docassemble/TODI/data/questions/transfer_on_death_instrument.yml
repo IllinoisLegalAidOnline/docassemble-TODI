@@ -114,6 +114,7 @@ code: |
     percent_default
   set_progress(100)
   user_list_logic
+  about_filing
   get_docs_screen
 ---
 depends on:
@@ -260,7 +261,7 @@ subquestion: |
 
   * Your Property Index Number ("PIN"), which should be on your deed, your property tax bill, and other documents recorded against the property. You can obtain the PIN from your County Clerk's Office, Assessor's Office, and sometimes at your county's website.
 
-  * The legal description of the property. You can find this in the property deed or other documents recorded against the property. If you do not have these, you can find them at the office of County Recorder of Deeds or their website. For example, in Cook County, you would go to the Recorder of Deeds website and search for your deed using your PIN. You could then view an image of the deed which contains the legal description. 
+  * The legal description of the property. You can find this in the property deed or other documents recorded against the property. If you do not have these, you can find them at the office of County Recorder of Deeds or their website. For example, in St. Clair County, you would go to the Recorder of Deeds website and search for your deed using your PIN. You could then view an image of the deed which contains the legal description. 
 ---
 id: illinois property
 question: |
@@ -1371,6 +1372,25 @@ fields:
     code: |
       states_list() 
   - ZIP code: witnesses[i].address.zip
+---
+id: about filing
+continue button field: about_filing
+question: |
+  Filing the TODI
+subquestion: |
+  After you download your TODI, you will need to:
+  
+    1. Sign and date it in front of 2 witnesses and a notary public,
+    2. Record the TODI with your county's Recorder of Deeds, and
+    3. Give copies to your beneficiaries.
+  
+  You may need to bring multiple copies of the TODI to the Recorder of Deeds. You may also need to pay a fee.
+  
+  % if end_in_county(todi_property.county).lower() == "cook county":
+  Check with the [**Cook County Clerk’s Office Recordings Division**](https://www.cookcountyclerkil.gov/recordings) to learn how to file your TODI.
+  % else:
+  Check with your county's Recorder of Deeds to learn how to file your TODI.
+  % endif
 ---
 id: get docs screen
 event: get_docs_screen
