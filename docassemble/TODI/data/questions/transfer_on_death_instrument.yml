@@ -46,6 +46,7 @@ mandatory: True
 code: |
   nav.set_section('section_intro')
   sees_nav_bar
+  snapshot_start
   set_progress(5)
   todi_requirements
   how_to_use
@@ -115,7 +116,38 @@ code: |
   set_progress(100)
   user_list_logic
   about_filing
+  forms_assembling
+  snapshot_forms
   get_docs_screen
+---
+code: |
+  stuff_to_snapshot = {
+  	'start_time': str(current_datetime().format_datetime()),
+  	'started_interview': True, 
+  	}
+    
+  stuff_to_snapshot['user_zip'] = showifdef('users[0].address.zip')
+
+  stuff_to_snapshot['downloaded_forms'] = showifdef('forms_assembling')
+  
+  stuff_to_snapshot['other_owners_check'] = showifdef('other_owners_check') 
+  
+  stuff_to_snapshot['beneficiary_count'] = showifdef('beneficiary_count') 
+  
+  stuff_to_snapshot['tenancy_type'] = showifdef('tenancy_type') 
+  
+  store_variables_snapshot(
+  	data=stuff_to_snapshot, persistent=True
+  	)
+  snapshot_interview_state = True
+---
+code: |
+  snapshot_interview_state
+  snapshot_start = True  
+---
+code: |
+  reconsider('snapshot_interview_state')
+  snapshot_forms = True
 ---
 depends on:
   - other_owners_check
@@ -1392,6 +1424,17 @@ subquestion: |
   Check with your county's Recorder of Deeds to learn how to file your TODI.
   % endif
 ---
+id: forms assembling
+continue button field: forms_assembling
+question: |
+  Almost done
+subquestion: |
+  After you click **Next**, it may take a few moments to finish making your forms.
+  
+  ###### You do not need to refresh your screen. Hang in there!
+  
+  [NEWLINE]
+---
 id: get docs screen
 event: get_docs_screen
 question: |
@@ -1635,7 +1678,7 @@ review:
       ${witnesses[1].address.on_one_line(bare=True)}
     show if: second_witness_known == True and second_witness_address_known == True
 ---
-id: beneficiaries review
+id: beneficiaries review screen
 continue button field: beneficiaries.revisit
 question: |
   Edit the information about the beneficiaries
@@ -1656,7 +1699,7 @@ delete buttons: True
 confirm: True
 ---
 section: About you
-id: review user
+id: user review screen
 event: section_user
 question: |
   About you
@@ -1755,7 +1798,7 @@ review:
     show if: joint_todi_check == True and shared_owners_type == "Joint Tenancy"
 ---
 section: Beneficiaries
-id: review beneficiaries
+id: beneficiaries review screen
 event: section_beneficiaries
 question: |
   Beneficiaries
@@ -1776,7 +1819,7 @@ review:
     show if: beneficiaries.number_gathered() > 1
 ---
 section: Property
-id: review property
+id: property review screen
 event: section_property
 question: |
   Property
@@ -1875,7 +1918,7 @@ review:
     show if: joint_todi_check == True and shared_owners_type == "Joint Tenancy"
 ---
 section: Witnesses
-id: review witnesses
+id: witnesses review screen
 event: section_witnesses
 question: |
   Witnesses
@@ -1921,7 +1964,7 @@ review:
       ${witnesses[1].address.on_one_line(bare=True)}
     show if: second_witness_known == True and second_witness_address_known == True
 ---
-id: beneficiary review
+id: beneficiary review screen
 continue button field: x.review_beneficiary
 generic object: ALIndividual
 question: |
