@@ -116,7 +116,6 @@ code: |
   set_progress(100)
   #user_list_logic
   about_filing
-  beneficiary_index_flag
   forms_assembling
   snapshot_forms
   get_docs_screen
@@ -217,15 +216,6 @@ code: |
   #else:
     #users.there_is_another = False
   user_list_logic = True
----
-reconsider: True
-code: |
-  for index, person in enumerate(beneficiaries):
-    if (index % 2) == 0:
-      person.even_index = True
-    else:
-      person.even_index = False
-  beneficiary_index_flag = True
 ---
 #sets:
 #  - test_intl_address.address
@@ -508,7 +498,7 @@ fields:
   - Legal description: todi_property.description
     input type: area
     rows: 10
-    maxlength: 20000
+    maxlength: 5000
 ---
 id: other owners check
 question: |
