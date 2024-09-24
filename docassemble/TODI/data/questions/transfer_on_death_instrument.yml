@@ -497,8 +497,9 @@ subquestion: |
 fields:
   - Legal description: todi_property.description
     input type: area
-    rows: 10
+    rows: 20
     maxlength: 5000
+    label above field: True
 ---
 id: other owners check
 question: |
