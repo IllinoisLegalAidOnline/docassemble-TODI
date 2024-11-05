@@ -68,11 +68,6 @@ code: |
     married_note
   users[0].complete = True
   nav.set_section('section_property')
-  todi_property.address
-  todi_property.county_correct
-  todi_property.pin
-  set_progress(40)
-  todi_property.description
   if other_owners_check == "multiple":   
     if shared_owners_type == "Joint Tenancy" or shared_owners_type == "Tenancy by the entirety":
       if joint_todi_check == True:
@@ -92,6 +87,12 @@ code: |
     elif shared_owners_type == "Tenancy in common":
       common_explanation
       user_common_share
+  todi_property.address
+  todi_property.county_correct
+  todi_property.pin
+  set_progress(40)
+  todi_property.description
+  
   nav.set_section('section_beneficiaries')
   set_progress(60)
   beneficiaries.gather()
