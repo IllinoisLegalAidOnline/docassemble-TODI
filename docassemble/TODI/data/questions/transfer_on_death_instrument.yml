@@ -505,10 +505,20 @@ fields:
 id: other owners check
 question: |
   Do you own this property by yourself, or do you own it with someone else?
+subquestion: |
+  ${collapse_template(deceased_owners)}
 field: other_owners_check
 choices:
   - I am the only owner.: sole
   - I share ownership of this property with someone else.: multiple
+---
+template: deceased_owners
+subject: |
+  **About dead co-owners** 
+content: |
+  If you owned the property with someone who has passed away, you may need to update the title to the property before you make a TODI.
+
+  Depending on how you and the deceased co-owned the property, their share of the property may have gone to you or to their heirs. If you are not sure what happened to their share, you may want to [**Get Legal Help**](https://www.illinoislegalaid.org/get-legal-help).
 ---
 sets:
   - ownership_types[i]
