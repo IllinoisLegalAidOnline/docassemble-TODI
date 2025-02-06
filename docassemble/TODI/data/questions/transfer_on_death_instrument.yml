@@ -53,8 +53,6 @@ code: |
   accept_terms
   if illinois_property == False:
     not_in_illinois
-  if any_consideration == True:
-    consideration_kickout
   nav.set_section('section_user')
   users[0].name.first
   users[0].address.address
@@ -318,27 +316,6 @@ buttons:
   - Exit: exit
   - Restart: restart
 ---
-id: any consideration
-question: |
-  Is someone paying for the property?
-subquestion: |
-  In other words, is someone giving money to you or the property owner to be listed in a TODI?
-fields:
-  - no label: any_consideration
-    datatype: yesnoradio
----
-id: consideration kickout
-event: consideration_kickout
-question: |
-  Sorry
-subquestion: |
-  You cannot use this program if someone is paying to get the property.
-  
-  If you want to sell someone an interest in your property, you may want to [**Get Legal Help**]("https://www.illinoislegalaid.org/get-legal-help").
-buttons:
-  - Exit: exit
-  - Restart: restart
----
 id: user name
 question: |
   What is your name?
@@ -505,10 +482,20 @@ fields:
 id: other owners check
 question: |
   Do you own this property by yourself, or do you own it with someone else?
+subquestion: |
+  ${collapse_template(deceased_owners)}
 field: other_owners_check
 choices:
   - I am the only owner.: sole
   - I share ownership of this property with someone else.: multiple
+---
+template: deceased_owners
+subject: |
+  **About dead co-owners** 
+content: |
+  If you owned the property with someone who has passed away, you may need to update the title to the property before you make a TODI.
+
+  Depending on how you and the deceased co-owned the property, their share of the property may have gone to you or to their heirs. If you are not sure what happened to their share, you may want to [**Get Legal Help**](https://www.illinoislegalaid.org/get-legal-help).
 ---
 sets:
   - ownership_types[i]
