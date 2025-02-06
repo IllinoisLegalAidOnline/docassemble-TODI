@@ -53,8 +53,6 @@ code: |
   accept_terms
   if illinois_property == False:
     not_in_illinois
-  if any_consideration == True:
-    consideration_kickout
   nav.set_section('section_user')
   users[0].name.first
   users[0].address.address
@@ -314,27 +312,6 @@ question: |
   Sorry
 subquestion: |
   You can only use this program for property located in Illinois.
-buttons:
-  - Exit: exit
-  - Restart: restart
----
-id: any consideration
-question: |
-  Is someone paying for the property?
-subquestion: |
-  In other words, is someone giving money to you or the property owner to be listed in a TODI?
-fields:
-  - no label: any_consideration
-    datatype: yesnoradio
----
-id: consideration kickout
-event: consideration_kickout
-question: |
-  Sorry
-subquestion: |
-  You cannot use this program if someone is paying to get the property.
-  
-  If you want to sell someone an interest in your property, you may want to [**Get Legal Help**]("https://www.illinoislegalaid.org/get-legal-help").
 buttons:
   - Exit: exit
   - Restart: restart
