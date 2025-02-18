@@ -22,7 +22,6 @@ objects:
   - witnesses: ALPeopleList.using(there_are_any=True)
   - court_list: ALCourtLoader.using(file_name='docassemble.ILAO:data/sources/il_courts.xlsx')
   - test_intl_address: ALAddress
-
 ---
 code: |
   ilao_easy_form_title = "Transfer on death instrument - TODI"
@@ -319,11 +318,20 @@ buttons:
 id: user name
 question: |
   What is your name?
+subquestion: |
+    If you don't have a first name and a last name, you can enter your name in the field labeled **First** and leave the other fields blank.
 fields:
   - First: users[0].name.first
   - Middle: users[0].name.middle
     required: False
   - Last: users[0].name.last
+    required: False
+  - Suffix: users[0].name.suffix
+    help: |
+      Some names have a suffix after the last name, such as "Senior," "III," or "Jr." If your name does not have a suffix, you can leave this blank.
+    code: |
+      name_suffix()
+    required: False
 ---
 id: user address
 question: |
@@ -633,11 +641,20 @@ question: |
   % else:
   What is the other owner's name?
   % endif
+subquestion: |
+  If they don't have a first name and a last name, you can enter their name in the field labeled **First** and leave the other fields blank.
 fields:
   - First: joint_owner.name.first
   - Middle: joint_owner.name.middle
     required: False
   - Last: joint_owner.name.last
+    required: False
+  - Suffix: joint_owner.name.suffix
+    help: |
+      Some names have a suffix after the last name, such as "Senior," "III," or "Jr." If your name does not have a suffix, you can leave this blank.
+    code: |
+      name_suffix()
+    required: False
 ---
 id: joint owner address
 question: |
@@ -785,11 +802,14 @@ subquestion: |
   % endif
   % endif
   ${collapse_template(living_trust_info)}
+
+  If they don't have a first name and a last name, you can enter their name in the field labeled **First** and leave the other fields blank.
 fields:
   - First: beneficiaries[i].name.first
   - Middle: beneficiaries[i].name.middle
     required: False
   - Last: beneficiaries[i].name.last
+    required: False
   - Suffix: beneficiaries[i].name.suffix
     code: |
       name_suffix()
@@ -1048,11 +1068,14 @@ sets:
 id: names of beneficiaries
 question: |
   What is the name of the successor beneficiary for ${beneficiaries[i].name.full(middle='full')}?
+subquestion: |
+  If they don't have a first name and a last name, you can enter their name in the field labeled **First** and leave the other fields blank.
 fields:
   - First: beneficiaries[i].successor_beneficiary.name.first
   - Middle: beneficiaries[i].successor_beneficiary.name.middle
     required: False
   - Last: beneficiaries[i].successor_beneficiary.name.last
+    required: False
   - Suffix: beneficiaries[i].successor_beneficiary.name.suffix
     code: |
       name_suffix()
@@ -1359,11 +1382,18 @@ code: |
 id: witness name
 question: |
   What is the name of your ${ ordinal(i) } witness?
+subquestion: |
+  If they don't have a first name and a last name, you can enter their name in the field labeled **First** and leave the other fields blank.
 fields:
   - First: witnesses[i].name.first
   - Middle: witnesses[i].name.middle
     required: False
   - Last: witnesses[i].name.last  
+    required: False
+  - Suffix: witnesses[i].name.suffix
+    code: |
+      name_suffix()
+    required: False  
 ---
 id: address known
 question: |
