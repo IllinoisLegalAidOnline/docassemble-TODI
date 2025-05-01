@@ -294,7 +294,7 @@ subquestion: |
   
   To complete this program, you will need to know: 
 
-  * Your Property Index Number ("PIN"), which should be on your deed, your property tax bill, and other documents recorded against the property. You can obtain the PIN from your County Clerk's Office, Assessor's Office, and sometimes at your county's website.
+  * Your Property Index Number ("PIN"), which should be on your deed, your property tax bill, and other documents recorded against the property. You can obtain the PIN from your County Clerk's Office, Assessor's Office, and sometimes at your county's website. It is sometimes called a "parcel number" or a "permanent index number."
 
   * The legal description of the property. You can find this in the property deed or other documents recorded against the property. If you do not have these, you can find them at the office of County Recorder of Deeds or their website. For example, in St. Clair County, you would go to the Recorder of Deeds website and search for your deed using your PIN. You could then view an image of the deed which contains the legal description. 
 ---
@@ -438,7 +438,7 @@ id: property pin
 question: |
   What is the Property Index Number ("PIN") for this property? 
 subquestion: |
-  You can find your PIN at your County Clerk's Office or Assessor's Office, and sometimes at your county's website. If your property is in one of the counties below, click their website to look up your PIN: 
+  You can find your PIN--sometimes called a "parcel number" or a "permanent index number"--at your County Clerk's Office or Assessor's Office, and sometimes at your county's website. If your property is in one of the counties below, click their website to look up your PIN: 
 
   * [**Cook County**](http://www.cookcountypropertyinfo.com/)
   * [**DuPage County**](http://www.dupageco.org/PropertyInfo/PropertyLookup.aspx)
