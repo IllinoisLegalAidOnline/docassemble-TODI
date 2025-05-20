@@ -1,5 +1,5 @@
 metadata:
-  title: Transfer on death instrument - TODI
+  title: Transfer on Death Instrument
   short title: TODI
   comment:  This program helps you prepare a Transfer On Death Instrument for your property located in Illinois. 
   authors:
@@ -24,7 +24,7 @@ objects:
   - test_intl_address: ALAddress
 ---
 code: |
-  ilao_easy_form_title = "Transfer on death instrument - TODI"
+  ilao_easy_form_title = "Transfer on Death Instrument"
   ilao_easy_form_url = "https://www.illinoislegalaid.org/legal-information/transfer-death-instrument-or-todi"
   github_user = 'IllinoisLegalAidOnline'
   github_repo_name = 'docassemble-TODI'
@@ -233,13 +233,13 @@ code: |
 ---
 id: welcome
 question: |
-  Transfer on death instrument - TODI
+  Transfer on Death Instrument
 subquestion: |
-  Welcome to Illinois Legal Aid Online's **Transfer on death instrument - TODI** Easy Form.
+  Welcome to Illinois Legal Aid Online's **Transfer on Death Instrument** Easy Form.
 
   This program helps you prepare a Transfer On Death Instrument (TODI) for your property located in Illinois. 
   
-  A TODI lets you to transfer real estate to your loved ones without including it in your will. This means your loved ones can avoid having to go to court to divide up your property after your death.
+  A TODI lets you to transfer real estate to your loved ones without including it in your will. This means your loved ones can avoid having to go to court to divide up your property after your death. To learn more, read ILAO's article about [**common questions about Transfer on Death Instruments**](https://www.illinoislegalaid.org/legal-information/transfer-death-instrument-common-questions).
   
   The form you create can only be used in Illinois.
   
@@ -297,6 +297,20 @@ subquestion: |
   * Your Property Index Number ("PIN"), which should be on your deed, your property tax bill, and other documents recorded against the property. You can obtain the PIN from your County Clerk's Office, Assessor's Office, and sometimes at your county's website. It is sometimes called a "parcel number" or a "permanent index number."
 
   * The legal description of the property. You can find this in the property deed or other documents recorded against the property. If you do not have these, you can find them at the office of County Recorder of Deeds or their website. For example, in St. Clair County, you would go to the Recorder of Deeds website and search for your deed using your PIN. You could then view an image of the deed which contains the legal description. 
+
+  ${collapse_template(bonus_info)}
+
+  To learn more, read ILAO's article about [**creating a Transfer on Death Instrument**](https://www.illinoislegalaid.org/legal-information/creating-transfer-death-instrument-todi).
+---
+template: bonus_info
+subject: |
+  **Taxes, property rights, and mortgages**
+content: |
+  During your lifetime, you will not need to pay taxes due to the TODI. However, the property will still be subject to estate tax. If the value of an your estate is high enough, your estate will still have to pay estate tax.
+  
+  You will still have all your property rights after making a TODI. You can do anything with the property that an owner has the right to do, including selling the property or using it as collateral on a loan. A beneficiary will not have any rights to the property until your death.
+
+  You can file a TODI even if your property has a mortgage. It will not affect the mortgage during your lifetime. The mortgage would follow the property, so if there is still a mortgage in place after your death, your beneficiary will inherit the property subject to that mortgage. Your beneficiary will need to make arrangements with any lenders to continue paying the mortgage.
 ---
 id: illinois property
 question: |
@@ -403,7 +417,7 @@ subquestion: |
   To learn more, read ILAO's articles about:
   
   * [**What happens when I die without a will?**](https://www.illinoislegalaid.org/legal-information/what-happens-when-i-die-without-will/)
-  * [**Giving someone your house when you die**](https://www.illinoislegalaid.org/legal-information/giving-someone-your-house-when-you-die)
+  * [**Transfer on Death Instrument basics*](https://www.illinoislegalaid.org/legal-information/giving-someone-your-house-when-you-die)
   * [**A will as a legal document to explain my wishes after I die**](https://www.illinoislegalaid.org/legal-information/will-legal-document-explain-my-wishes-after-i-die)
 ---
 id: joint married note
@@ -416,7 +430,7 @@ subquestion: |
   To learn more, read ILAO's articles about:
   
   * [**What happens when I die without a will?**](https://www.illinoislegalaid.org/legal-information/what-happens-when-i-die-without-will/)
-  * [**Giving someone your house when you die**](https://www.illinoislegalaid.org/legal-information/giving-someone-your-house-when-you-die)
+  * [**Transfer on Death Instrument basics*](https://www.illinoislegalaid.org/legal-information/giving-someone-your-house-when-you-die)
   * [**A will as a legal document to explain my wishes after I die**](https://www.illinoislegalaid.org/legal-information/will-legal-document-explain-my-wishes-after-i-die)
 ---
 id: property address
@@ -1492,7 +1506,7 @@ under: |
 generic object: ALDocumentBundle
 template: x.send_email_template
 subject: |
-  Transfer on death instrument
+  Transfer on Death Instrument
 content: |
   Your forms are attached.
   
