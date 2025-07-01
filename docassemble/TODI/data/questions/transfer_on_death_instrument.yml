@@ -425,7 +425,7 @@ continue button field: joint_married_note
 question: |
   Note about property for married people
 subquestion: |
-  If ${joint_owner.name.full(middle='full')}'s spouse outlives them their spouse may be able to stop the TODI, even if they have been separated for a long time. If they stop the TODI, they will receive a share of the property.
+  If ${joint_owner.name_full()}'s spouse outlives them their spouse may be able to stop the TODI, even if they have been separated for a long time. If they stop the TODI, they will receive a share of the property.
   
   To learn more, read ILAO's articles about:
   
@@ -672,7 +672,7 @@ fields:
 ---
 id: joint owner address
 question: |
-  What is ${joint_owner.name.full(middle='full')}'s mailing address?
+  What is ${joint_owner.name_full()}'s mailing address?
 fields:
   - Street address: joint_owner.address.address
     address autocomplete: True
@@ -687,28 +687,28 @@ fields:
 ---
 id: joint owner phone check
 question: |
-  Do you want to include ${joint_owner.name.full(middle='full')}'s phone number in the TODI?
+  Do you want to include ${joint_owner.name_full()}'s phone number in the TODI?
 fields:
   - no label: joint_owner.include_phone
     datatype: yesnoradio
 ---
 id: joint owner phone number
 question: |
-  What is ${joint_owner.name.full(middle='full')}'s phone number?
+  What is ${joint_owner.name_full()}'s phone number?
 fields:
   - Phone number: joint_owner.phone_number
     datatype: al_international_phone
 ---
 id: joint owner email check
 question: |
-  Do you want to include ${joint_owner.name.full(middle='full')}'s email address in the TODI?
+  Do you want to include ${joint_owner.name_full()}'s email address in the TODI?
 fields:
   - no label: joint_owner.include_email
     datatype: yesnoradio
 ---
 id: joint owner email address
 question: |
-  What is ${joint_owner.name.full(middle='full')}'s email address?
+  What is ${joint_owner.name_full()}'s email address?
 fields: 
   - Email: joint_owner.email
     datatype: email
@@ -726,7 +726,7 @@ depends on:
   - shared_owners_type
 id: joint owner marital status
 question: |
-  What is ${joint_owner.name.full(middle='full')}'s marital status?
+  What is ${joint_owner.name_full()}'s marital status?
 subquestion: |
   If they are married, their marriage may affect ownership of the property.
 field: joint_owner.marital_status_ask
@@ -735,7 +735,7 @@ choices:
   - Married
   - Legally separated by a judge: Legally separated by a judge
     help: |
-      A legal separation is a court-ordered arrangement for a married couple to live separately and separate their assets. If ${joint_owner.name.full(middle='full')} lives apart from their spouse but were not separated by a judge, they are still considered married.
+      A legal separation is a court-ordered arrangement for a married couple to live separately and separate their assets. If ${joint_owner.name_full()} lives apart from their spouse but were not separated by a judge, they are still considered married.
   - Divorced
   - Widowed
 ---
@@ -812,7 +812,7 @@ subquestion: |
   % if joint_language == False:
   A beneficiary is the person you want to get your property or a share of your property after you pass away.
   % else:
-  A beneficiary is the person you want to get your property or a share of your property after you and ${joint_owner.name.full(middle='full')} pass away.
+  A beneficiary is the person you want to get your property or a share of your property after you and ${joint_owner.name_full()} pass away.
   % endif
   % endif
   ${collapse_template(living_trust_info)}
@@ -841,11 +841,11 @@ id: beneficiary address
 sets:
   - beneficiaries[i].address.address
 question: |
-  Enter ${beneficiaries[i].name.full(middle='full')}'s address
+  Enter ${beneficiaries[i].name_full()}'s address
 #subquestion: |
 #  ${collapse_template(intl_info)}
 fields:
-  - Does ${beneficiaries[i].name.full(middle='full')} have a United States address?: beneficiaries[i].in_america
+  - Does ${beneficiaries[i].name_full()} have a United States address?: beneficiaries[i].in_america
     datatype: yesnoradio
     default: True
     help: |
@@ -875,41 +875,41 @@ fields:
 ---
 template: intl_info
 subject: |
-  **What if ${beneficiaries[i].name.full(middle='full')} does not have a United States address?** 
+  **What if ${beneficiaries[i].name_full()} does not have a United States address?** 
 content: |
-  You can list an international address for ${beneficiaries[i].name.full(middle='full')}. For international addresses, there will be space for two lines to enter the address. You should enter the international address using the English alphabet.
+  You can list an international address for ${beneficiaries[i].name_full()}. For international addresses, there will be space for two lines to enter the address. You should enter the international address using the English alphabet.
 ---
 id: beneficiary related to who
 question: |
-  Is ${beneficiaries[i].name.full(middle='full')} related to you, ${joint_owner.name.full(middle='full')}, or both?
+  Is ${beneficiaries[i].name_full()} related to you, ${joint_owner.name_full()}, or both?
 subquestion: |
-  ${beneficiaries[i].name.full(middle='full')} does not have to be a family member. Their relationship to you or ${joint_owner.name.full(middle='full')} could be "friend."
+  ${beneficiaries[i].name_full()} does not have to be a family member. Their relationship to you or ${joint_owner.name_full()} could be "friend."
 fields:
   - no label: beneficiaries[i].related_to_who
     input type: radio
     choices:
     - They are related to me.: me
-    - They are related to ${joint_owner.name.full(middle='full')}.: joint owner
+    - They are related to ${joint_owner.name_full()}.: joint owner
     - They are related to both of us.: both
 ---
 id: successor related to who
 question: |
-  Is ${beneficiaries[i].successor_beneficiary.name.full(middle='full')} related to you, ${joint_owner.name.full(middle='full')}, or both?
+  Is ${beneficiaries[i].successor_beneficiary.name_full()} related to you, ${joint_owner.name_full()}, or both?
 subquestion: |
-  ${beneficiaries[i].successor_beneficiary.name.full(middle='full')} does not have to be a family member. Their relationship to you or ${joint_owner.name.full(middle='full')} could be "friend."
+  ${beneficiaries[i].successor_beneficiary.name_full()} does not have to be a family member. Their relationship to you or ${joint_owner.name_full()} could be "friend."
 fields:
   - no label: beneficiaries[i].successor_beneficiary.related_to_who
     input type: radio
     choices:
     - They are related to me.: me
-    - They are related to ${joint_owner.name.full(middle='full')}.: joint owner
+    - They are related to ${joint_owner.name_full()}.: joint owner
     - They are related to both of us.: both
 ---
 id: beneficiary relationship
 sets:
   - beneficiaries[i].relationship
 question: |
-  What is ${beneficiaries[i].name.full(middle='full')}'s relationship to you?
+  What is ${beneficiaries[i].name_full()}'s relationship to you?
 fields: 
   - Relationship: beneficiaries[i].relationship_radio
     input type: radio
@@ -937,7 +937,7 @@ id: beneficiary joint owner relationship
 sets:
   - beneficiaries[i].joint_relationship
 question: |
-  What is ${beneficiaries[i].name.full(middle='full')}'s relationship to ${joint_owner.name.full(middle='full')}?
+  What is ${beneficiaries[i].name_full()}'s relationship to ${joint_owner.name_full()}?
 fields: 
   - Relationship: beneficiaries[i].joint_relationship_radio
     input type: radio
@@ -973,14 +973,14 @@ code: |
     beneficiaries[i].relationship_info = beneficiaries[i].relationship
   else:
     if beneficiaries[i].related_to_who == "me":
-      beneficiaries[i].relationship_info = beneficiaries[i].relationship + " of " + users[0].name.full(middle='full')
+      beneficiaries[i].relationship_info = beneficiaries[i].relationship + " of " + users[0].name_full()
     elif beneficiaries[i].related_to_who == "joint owner":
-      beneficiaries[i].relationship_info = beneficiaries[i].joint_relationship + " of " + joint_owner.name.full(middle='full')
+      beneficiaries[i].relationship_info = beneficiaries[i].joint_relationship + " of " + joint_owner.name_full()
     elif beneficiaries[i].related_to_who == "both":
       if beneficiaries[i].relationship == beneficiaries[i].joint_relationship:
-        beneficiaries[i].relationship_info = beneficiaries[i].relationship + " of " + users[0].name.full(middle='full') + " and " + joint_owner.name.full(middle='full')
+        beneficiaries[i].relationship_info = beneficiaries[i].relationship + " of " + users[0].name_full() + " and " + joint_owner.name_full()
       else:
-        beneficiaries[i].relationship_info = beneficiaries[i].relationship + " of " + users[0].name.full(middle='full') + " and " + beneficiaries[i].joint_relationship + " of " + joint_owner.name.full(middle='full')
+        beneficiaries[i].relationship_info = beneficiaries[i].relationship + " of " + users[0].name_full() + " and " + beneficiaries[i].joint_relationship + " of " + joint_owner.name_full()
 ---
 depends on:
   - joint_language
@@ -994,18 +994,18 @@ code: |
     beneficiaries[i].successor_beneficiary.relationship_info = beneficiaries[i].successor_beneficiary.relationship
   else:
     if beneficiaries[i].successor_beneficiary.related_to_who == "me":
-      beneficiaries[i].successor_beneficiary.relationship_info = beneficiaries[i].successor_beneficiary.relationship + " of " + users[0].name.full(middle='full')
+      beneficiaries[i].successor_beneficiary.relationship_info = beneficiaries[i].successor_beneficiary.relationship + " of " + users[0].name_full()
     elif beneficiaries[i].successor_beneficiary.related_to_who == "joint owner":
-      beneficiaries[i].successor_beneficiary.relationship_info = beneficiaries[i].successor_beneficiary.joint_relationship + " of " + joint_owner.name.full(middle='full')
+      beneficiaries[i].successor_beneficiary.relationship_info = beneficiaries[i].successor_beneficiary.joint_relationship + " of " + joint_owner.name_full()
     elif beneficiaries[i].successor_beneficiary.related_to_who == "both":
       if beneficiaries[i].successor_beneficiary.relationship == beneficiaries[i].successor_beneficiary.joint_relationship:
-        beneficiaries[i].successor_beneficiary.relationship_info = beneficiaries[i].successor_beneficiary.relationship + " of " + users[0].name.full(middle='full') + " and " + joint_owner.name.full(middle='full')
+        beneficiaries[i].successor_beneficiary.relationship_info = beneficiaries[i].successor_beneficiary.relationship + " of " + users[0].name_full() + " and " + joint_owner.name_full()
       else:
-        beneficiaries[i].successor_beneficiary.relationship_info = beneficiaries[i].successor_beneficiary.relationship + " of " + users[0].name.full(middle='full') + " and " + beneficiaries[i].successor_beneficiary.joint_relationship + " of " + joint_owner.name.full(middle='full')
+        beneficiaries[i].successor_beneficiary.relationship_info = beneficiaries[i].successor_beneficiary.relationship + " of " + users[0].name_full() + " and " + beneficiaries[i].successor_beneficiary.joint_relationship + " of " + joint_owner.name_full()
 ---
 id: beneficiary benefits
 question: |
-  Does ${beneficiaries[i].name.full(middle='full')} receive any public benefits?
+  Does ${beneficiaries[i].name_full()} receive any public benefits?
 subquestion: |
   Public benefits include SNAP (food stamps), Social Security Disability Insurance (SSDI), or Supplemental Security Income (SSI).
 fields:
@@ -1021,22 +1021,22 @@ subquestion: |
   
   In other words, it is possible that receiving an ownership interest in a home could disqualify someone from the public benefit they receive.
   
-  You may wish to speak to ${beneficiaries[i].name.full(middle='full')} or a lawyer about this before moving forward.
+  You may wish to speak to ${beneficiaries[i].name_full()} or a lawyer about this before moving forward.
 ---
 sets:
   - beneficiaries[i].has_successor
 id: successor beneficiary check
 question: |
-  Would you like to name a successor beneficiary for ${beneficiaries[i].name.full(middle='full')}?
+  Would you like to name a successor beneficiary for ${beneficiaries[i].name_full()}?
 subquestion: |
   % if joint_language == False:
-  A successor beneficiary is a loved one who will inherit the property if ${beneficiaries[i].name.full(middle='full')} passes away before you do. They are also called a "secondary beneficiary."
+  A successor beneficiary is a loved one who will inherit the property if ${beneficiaries[i].name_full()} passes away before you do. They are also called a "secondary beneficiary."
   
   % if beneficiaries[i].relationship_radio == "Child":
   **Note:** If you do not name a successor beneficiary and your child passes away before you do, your child's share in your home will go to any surviving children of your child.
   % endif
   % else:
-  A successor beneficiary is a loved one who will inherit the property if ${beneficiaries[i].name.full(middle='full')} passes away before you and ${joint_owner.name.full(middle='full')} do. They are also called a "secondary beneficiary."
+  A successor beneficiary is a loved one who will inherit the property if ${beneficiaries[i].name_full()} passes away before you and ${joint_owner.name_full()} do. They are also called a "secondary beneficiary."
   % endif
   
   ${collapse_template(multiple_successor_note)}
@@ -1046,7 +1046,7 @@ fields:
 ---
 template: multiple_successor_note
 subject: |
-  **What if I want to list multiple successors for ${beneficiaries[i].name.full(middle='full')}?**
+  **What if I want to list multiple successors for ${beneficiaries[i].name_full()}?**
 content: | 
   Listing more than one successor for a single beneficiary can raise complicated issues. This program can only list one successor for each beneficiary. If you want to make a TODI that names multiple successors for a single beneficiary, you should talk to a lawyer.
   
@@ -1058,9 +1058,9 @@ question: |
   Note about child beneficiaries
 subquestion: |
   % if joint_language == False:
-  If you do not name a successor beneficiary and ${beneficiaries[i].name.full(middle='full')} passes away before you do, their share of your home will go to their heirs.
+  If you do not name a successor beneficiary and ${beneficiaries[i].name_full()} passes away before you do, their share of your home will go to their heirs.
   % else:
-  If you do not name a successor beneficiary and ${beneficiaries[i].name.full(middle='full')} passes away before you or ${joint_owner.name.full(middle='full')} do, their share in your home will go to their heirs.
+  If you do not name a successor beneficiary and ${beneficiaries[i].name_full()} passes away before you or ${joint_owner.name_full()} do, their share in your home will go to their heirs.
   % endif
 ---
 id: probate warning
@@ -1068,7 +1068,7 @@ continue button field: probate_warning
 question: |
   Note about probate
 subquestion: |
-  If you do not name a successor beneficiary and ${beneficiaries[0].name.full(middle='full')} passes away before you, your home would go through your estate. This would require your heirs to go through probate court. 
+  If you do not name a successor beneficiary and ${beneficiaries[0].name_full()} passes away before you, your home would go through your estate. This would require your heirs to go through probate court. 
 ---
 sets:
   - first_pass
@@ -1081,7 +1081,7 @@ sets:
   - beneficiaries[i].successor_beneficiary.name.first
 id: names of beneficiaries
 question: |
-  What is the name of the successor beneficiary for ${beneficiaries[i].name.full(middle='full')}?
+  What is the name of the successor beneficiary for ${beneficiaries[i].name_full()}?
 subquestion: |
   If they don't have a first name and a last name, you can enter their name in the field labeled **First** and leave the other fields blank.
 fields:
@@ -1097,9 +1097,9 @@ fields:
 ---
 id: successor location
 question: |
-  Enter ${beneficiaries[i].successor_beneficiary.name.full(middle='full')}'s location
+  Enter ${beneficiaries[i].successor_beneficiary.name_full()}'s location
 fields:
-  - Does ${beneficiaries[i].successor_beneficiary.name.full(middle='full')} live in the United States?: beneficiaries[i].successor_beneficiary.in_america
+  - Does ${beneficiaries[i].successor_beneficiary.name_full()} live in the United States?: beneficiaries[i].successor_beneficiary.in_america
     datatype: yesnoradio
     default: True
   - City: beneficiaries[i].successor_beneficiary.address.city
@@ -1114,7 +1114,7 @@ fields:
 ---
 id: successor joint relationship
 question: |
-  What is ${beneficiaries[i].successor_beneficiary.name.full(middle='full')}'s relationship to ${joint_owner.name.full(middle='full')}?
+  What is ${beneficiaries[i].successor_beneficiary.name_full()}'s relationship to ${joint_owner.name_full()}?
 fields: 
   - Relationship: beneficiaries[i].successor_beneficiary.joint_relationship_radio
     input type: radio
@@ -1140,7 +1140,7 @@ code: |
 ---
 id: successor relationship
 question: |
-  What is ${beneficiaries[i].successor_beneficiary.name.full(middle='full')}'s relationship to you?
+  What is ${beneficiaries[i].successor_beneficiary.name_full()}'s relationship to you?
 fields: 
   - Relationship: beneficiaries[i].successor_beneficiary.relationship_radio
     input type: radio
@@ -1288,22 +1288,22 @@ depends on:
   - beneficiary_count
 id: beneficiary share
 question: |
-  What is ${beneficiaries[i].name.full(middle='full')}'s percent share of the property?
+  What is ${beneficiaries[i].name_full()}'s percent share of the property?
 subquestion: |
   % if i > 0:
   
   % for person in beneficiaries:
   % if beneficiaries.index(person) < i:
-  * ${person.name.full(middle='full')}'s share is ${person.percent_share}%.  
+  * ${person.name_full()}'s share is ${person.percent_share}%.  
   % else:
-  * ${person.name.full(middle='full')}'s share is 0%.
+  * ${person.name_full()}'s share is 0%.
   % endif
   % endfor
   % endif
   
   The total percentage you have listed so far is ${running_total}%.
 fields:
-  - ${beneficiaries[i].name.full(middle='full')}'s percent share: beneficiaries[i].percent_share
+  - ${beneficiaries[i].name_full()}'s percent share: beneficiaries[i].percent_share
     datatype: number
     min: 0.01
     max: 99.99
@@ -1339,7 +1339,7 @@ question: |
 subquestion: |
 
   % for person in beneficiaries:
-  * ${person.name.full(middle='full')}'s share is ${person.percent_share}%.
+  * ${person.name_full()}'s share is ${person.percent_share}%.
   % endfor
   
   The percentages you listed for each beneficiary add up to ${running_total}%. They should add up to 100%. 
@@ -1378,7 +1378,7 @@ question: |
 subquestion: |
   You will need to have two witnesses sign the TODI with you in front of a notary public. You don't need to know who your witnesses will be right now, but you will need to add their names and addresses later.
   % if first_witness_known == True:
-  You said ${witnesses[0].name.full(middle="full") } will be your other witness. Your beneficiaries cannot serve as witnesses.
+  You said ${witnesses[0].name_full() } will be your other witness. Your beneficiaries cannot serve as witnesses.
   % else:
   Your beneficiaries cannot serve as witnesses.
   % endif
@@ -1411,25 +1411,25 @@ fields:
 ---
 id: address known
 question: |
-  Do you know ${witnesses[0].name.full(middle="full") }'s address?
+  Do you know ${witnesses[0].name_full() }'s address?
 subquestion: |
-  If you do not know this now, you can add it when ${witnesses[0].name.full(middle="full") } signs the TODI as your witness.
+  If you do not know this now, you can add it when ${witnesses[0].name_full() } signs the TODI as your witness.
 fields:
   - no label: first_witness_address_known
     datatype: yesnoradio
 ---
 id: second address known
 question: |
-  Do you know ${witnesses[1].name.full(middle="full") }'s address?
+  Do you know ${witnesses[1].name_full() }'s address?
 subquestion: |
-  If you do not know this now, you can add it when ${witnesses[1].name.full(middle="full") } signs the TODI as your witness.
+  If you do not know this now, you can add it when ${witnesses[1].name_full() } signs the TODI as your witness.
 fields:
   - no label: second_witness_address_known
     datatype: yesnoradio
 ---
 id: witness address
 question: |
-  What is ${witnesses[i].name.full(middle="full") }'s address?
+  What is ${witnesses[i].name_full() }'s address?
 subquestion: |
   If you do not know this now, click **Back**.
 fields:
@@ -1544,7 +1544,7 @@ review:
   - Edit: users[0].name.first
     button: |
       **Your name:**
-      ${users[0].name.full(middle='full')}
+      ${users[0].name_full()}
   - label: Edit
     fields:
       - users[0].address.address
@@ -1625,7 +1625,7 @@ review:
       % else:
       **Your joint owner's name:**
       % endif
-      ${joint_owner.name.full(middle='full')}
+      ${joint_owner.name_full()}
     show if: joint_todi_check
   - label: Edit
     fields:
@@ -1638,22 +1638,22 @@ review:
     show if: joint_todi_check
   - Edit: joint_owner.include_phone
     button: |
-      **Do you want to include ${joint_owner.name.full(middle='full')}'s phone number?**
+      **Do you want to include ${joint_owner.name_full()}'s phone number?**
       ${word(yesno(joint_owner.include_phone))}
     show if: joint_todi_check
   - Edit: joint_owner.phone_number
     button: |
-      **${joint_owner.name.full(middle='full')}'s phone number:**
+      **${joint_owner.name_full()}'s phone number:**
       ${phone_number_formatted(joint_owner.phone_number)}
     show if: joint_owner.include_phone == True and joint_todi_check == True
   - Edit: joint_owner.include_email
     button: |
-      **Do you want to include ${joint_owner.name.full(middle='full')}'s email address?**
+      **Do you want to include ${joint_owner.name_full()}'s email address?**
       ${word(yesno(joint_owner.include_email))}
     show if: joint_todi_check
   - Edit: joint_owner.email
     button: |
-      **${joint_owner.name.full(middle='full')}'s email address:**
+      **${joint_owner.name_full()}'s email address:**
       ${joint_owner.email}
     show if: joint_owner.include_email == True and joint_todi_check == True
   - label: Edit
@@ -1662,7 +1662,7 @@ review:
       - recompute:
         - co_owner_marital_check
     button: |
-      **${joint_owner.name.full(middle='full')}'s marital status:**
+      **${joint_owner.name_full()}'s marital status:**
       ${joint_owner.marital_status}
     show if: joint_todi_check == True and shared_owners_type == "Joint Tenancy"
   - Edit: beneficiaries.revisit
@@ -1670,7 +1670,7 @@ review:
       **Beneficiaries: (Edit to change names, addresses, and successors)**
 
       % for my_var in beneficiaries:
-        * ${ my_var.name.full(middle="full") }
+        * ${ my_var.name_full() }
       % endfor
   - Edit: tenancy_type
     button: |
@@ -1684,16 +1684,16 @@ review:
   - Edit: witnesses[0].name.first
     button: |
       **First witness's name:**
-      ${witnesses[0].name.full(middle='full')}
+      ${witnesses[0].name_full()}
     show if: first_witness_known
   - Edit: first_witness_address_known
     button: |
-      **Do you know ${witnesses[0].name.full(middle='full')}'s address?**
+      **Do you know ${witnesses[0].name_full()}'s address?**
       ${word(yesno(first_witness_address_known))}
     show if: first_witness_known
   - Edit: witnesses[0].address.address
     button: |
-      **${witnesses[0].name.full(middle='full')}'s address:**
+      **${witnesses[0].name_full()}'s address:**
       ${witnesses[0].address.on_one_line(bare=True)}
     show if: first_witness_known == True and first_witness_address_known == True 
   - Edit: second_witness_known
@@ -1703,16 +1703,16 @@ review:
   - Edit: witnesses[1].name.first
     button: |
       **Second witness's name:**
-      ${witnesses[1].name.full(middle='full')}
+      ${witnesses[1].name_full()}
     show if: second_witness_known == True
   - Edit: second_witness_address_known
     button: |
-      **Do you know ${witnesses[1].name.full(middle='full')}'s address?**
+      **Do you know ${witnesses[1].name_full()}'s address?**
       ${word(yesno(second_witness_address_known))}
     show if: second_witness_known == True
   - Edit: witnesses[1].address.address
     button: |
-      **${witnesses[1].name.full(middle='full')}'s address:**
+      **${witnesses[1].name_full()}'s address:**
       ${witnesses[1].address.on_one_line(bare=True)}
     show if: second_witness_known == True and second_witness_address_known == True
 ---
@@ -1730,7 +1730,7 @@ table: beneficiaries.table
 rows: beneficiaries
 columns:
   - Name: |
-      row_item.name.full(middle="full") if defined("row_item.name.first") else ""
+      row_item.name_full() if defined("row_item.name.first") else ""
   - Address, phone number, relationship, share, and successor: |
       action_button_html(url_action(row_item.attr_name("review_beneficiary")), label="Edit", icon="pencil-alt")
 delete buttons: True
@@ -1747,7 +1747,7 @@ review:
   - Edit: users[0].name.first
     button: |
       **Your name:**
-      ${users[0].name.full(middle='full')}
+      ${users[0].name_full()}
   - label: Edit
     fields:
       - users[0].address.address
@@ -1794,7 +1794,7 @@ review:
       % else:
       **Your joint owner's name:**
       % endif
-      ${joint_owner.name.full(middle='full')}
+      ${joint_owner.name_full()}
     show if: joint_todi_check
   - label: Edit
     fields:
@@ -1802,27 +1802,27 @@ review:
       - recompute:
         - joint_owner.address.county_correct
     button: |
-      **${joint_owner.name.full(middle='full')}'s address:**
+      **${joint_owner.name_full()}'s address:**
       ${joint_owner.address.on_one_line(bare=True)}, ${end_in_county(joint_owner.address.county)}
     show if: joint_todi_check
   - Edit: joint_owner.include_phone
     button: |
-      **Do you want to include ${joint_owner.name.full(middle='full')}'s phone number?**
+      **Do you want to include ${joint_owner.name_full()}'s phone number?**
       ${word(yesno(joint_owner.include_phone))}
     show if: joint_todi_check
   - Edit: joint_owner.phone_number
     button: |
-      **${joint_owner.name.full(middle='full')}'s phone number:**
+      **${joint_owner.name_full()}'s phone number:**
       ${phone_number_formatted(joint_owner.phone_number)}
     show if: joint_owner.include_phone == True and joint_todi_check == True
   - Edit: joint_owner.include_email
     button: |
-      **Do you want to include ${joint_owner.name.full(middle='full')}'s email address?**
+      **Do you want to include ${joint_owner.name_full()}'s email address?**
       ${word(yesno(joint_owner.include_email))}
     show if: joint_todi_check
   - Edit: joint_owner.email
     button: |
-      **${joint_owner.name.full(middle='full')}'s email address:**
+      **${joint_owner.name_full()}'s email address:**
       ${joint_owner.email}
     show if: joint_owner.include_email == True and joint_todi_check == True
   - label: Edit
@@ -1831,7 +1831,7 @@ review:
       - recompute:
         - co_owner_marital_check
     button: |
-      **${joint_owner.name.full(middle='full')}'s marital status:**
+      **${joint_owner.name_full()}'s marital status:**
       ${joint_owner.marital_status}
     show if: joint_todi_check == True and shared_owners_type == "Joint Tenancy"
 ---
@@ -1848,7 +1848,7 @@ review:
       **Beneficiaries: (Edit to change names, addresses, and successors)**
 
       % for my_var in beneficiaries:
-        * ${ my_var.name.full(middle="full") }
+        * ${ my_var.name_full() }
       % endfor
   - Edit: tenancy_type
     button: |
@@ -1914,7 +1914,7 @@ review:
       % else:
       **Your joint owner's name:**
       % endif
-      ${joint_owner.name.full(middle='full')}
+      ${joint_owner.name_full()}
     show if: joint_todi_check
   - label: Edit
     fields:
@@ -1922,27 +1922,27 @@ review:
       - recompute:
         - joint_owner.address.county_correct
     button: |
-      **${joint_owner.name.full(middle='full')}'s address:**
+      **${joint_owner.name_full()}'s address:**
       ${joint_owner.address.on_one_line(bare=True)}, ${end_in_county(joint_owner.address.county)}
     show if: joint_todi_check
   - Edit: joint_owner.include_phone
     button: |
-      **Do you want to include ${joint_owner.name.full(middle='full')}'s phone number?**
+      **Do you want to include ${joint_owner.name_full()}'s phone number?**
       ${word(yesno(joint_owner.include_phone))}
     show if: joint_todi_check
   - Edit: joint_owner.phone_number
     button: |
-      **${joint_owner.name.full(middle='full')}'s phone number:**
+      **${joint_owner.name_full()}'s phone number:**
       ${phone_number_formatted(joint_owner.phone_number)}
     show if: joint_owner.include_phone == True and joint_todi_check == True
   - Edit: joint_owner.include_email
     button: |
-      **Do you want to include ${joint_owner.name.full(middle='full')}'s email address?**
+      **Do you want to include ${joint_owner.name_full()}'s email address?**
       ${word(yesno(joint_owner.include_email))}
     show if: joint_todi_check
   - Edit: joint_owner.email
     button: |
-      **${joint_owner.name.full(middle='full')}'s email address:**
+      **${joint_owner.name_full()}'s email address:**
       ${joint_owner.email}
     show if: joint_owner.include_email == True and joint_todi_check == True
   - label: Edit
@@ -1951,7 +1951,7 @@ review:
       - recompute:
         - co_owner_marital_check
     button: |
-      **${joint_owner.name.full(middle='full')}'s marital status:**
+      **${joint_owner.name_full()}'s marital status:**
       ${joint_owner.marital_status}
     show if: joint_todi_check == True and shared_owners_type == "Joint Tenancy"
 ---
@@ -1970,16 +1970,16 @@ review:
   - Edit: witnesses[0].name.first
     button: |
       **First witness's name:**
-      ${witnesses[0].name.full(middle='full')}
+      ${witnesses[0].name_full()}
     show if: first_witness_known
   - Edit: first_witness_address_known
     button: |
-      **Do you know ${witnesses[0].name.full(middle='full')}'s address?**
+      **Do you know ${witnesses[0].name_full()}'s address?**
       ${word(yesno(first_witness_address_known))}
     show if: first_witness_known
   - Edit: witnesses[0].address.address
     button: |
-      **${witnesses[0].name.full(middle='full')}'s address:**
+      **${witnesses[0].name_full()}'s address:**
       ${witnesses[0].address.on_one_line(bare=True)}
     show if: first_witness_known == True and first_witness_address_known == True 
   - Edit: second_witness_known
@@ -1989,16 +1989,16 @@ review:
   - Edit: witnesses[1].name.first
     button: |
       **Second witness's name:**
-      ${witnesses[1].name.full(middle='full')}
+      ${witnesses[1].name_full()}
     show if: second_witness_known == True
   - Edit: second_witness_address_known
     button: |
-      **Do you know ${witnesses[1].name.full(middle='full')}'s address?**
+      **Do you know ${witnesses[1].name_full()}'s address?**
       ${word(yesno(second_witness_address_known))}
     show if: second_witness_known == True
   - Edit: witnesses[1].address.address
     button: |
-      **${witnesses[1].name.full(middle='full')}'s address:**
+      **${witnesses[1].name_full()}'s address:**
       ${witnesses[1].address.on_one_line(bare=True)}
     show if: second_witness_known == True and second_witness_address_known == True
 ---
@@ -2006,15 +2006,15 @@ id: beneficiary review screen
 continue button field: x.review_beneficiary
 generic object: ALIndividual
 question: |
-  Edit ${x.name.full(middle='full')}'s information
+  Edit ${x.name_full()}'s information
 review: 
   - Edit: x.name.first
     button: |
       **Beneficiary name:**
-      ${ x.name.full(middle="full")  }
+      ${ x.name_full()  }
   - Edit: x.in_america
     button: |
-      **${ x.name.full(middle="full") }'s address:**
+      **${ x.name_full() }'s address:**
       % if x.in_america == True:
       ${ x.address.on_one_line(bare=True) }
       % else:
@@ -2022,7 +2022,7 @@ review:
       % endif
   - Edit: x.phone_number
     button: |
-      **${ x.name.full(middle="full") }'s phone number:**
+      **${ x.name_full() }'s phone number:**
       ${ phone_number_formatted(x.phone_number) }
   - label: Edit
     fields: 
@@ -2030,13 +2030,13 @@ review:
       - recompute:
         - x.relationship_info
     button: |
-      **Who is ${x.name.full(middle='full')} related to?**
+      **Who is ${x.name_full()} related to?**
       % if x.related_to_who == "me":
-      ${users[0].name.full(middle='full')}
+      ${users[0].name_full()}
       % elif x.related_to_who == "joint owner":
-      ${joint_owner.name.full(middle='full')}
+      ${joint_owner.name_full()}
       % elif x.related_to_who == "both":
-      Both ${users[0].name.full(middle='full')} and ${joint_owner.name.full(middle='full')}
+      Both ${users[0].name_full()} and ${joint_owner.name_full()}
       % endif
     show if: joint_language
   - label: Edit 
@@ -2046,7 +2046,7 @@ review:
         - x.relationship
         - x.relationship_info
     button: |
-      **${x.name.full(middle='full')}'s relationship to you:**
+      **${x.name_full()}'s relationship to you:**
       ${x.relationship}
     show if: joint_language == False or x.related_to_who != "joint owner"
   - label: Edit
@@ -2056,26 +2056,26 @@ review:
         - x.joint_relationship
         - x.relationship_info
     button: |
-      **${x.name.full(middle='full')}'s relationship to ${joint_owner.name.full(middle='full')}:**
+      **${x.name_full()}'s relationship to ${joint_owner.name_full()}:**
       ${x.joint_relationship}
     show if: joint_language == True and x.related_to_who != "me"
   - Edit: x.percent_share
     button: |
-      **${ x.name.full(middle="full") }'s share of the property:**
+      **${ x.name_full() }'s share of the property:**
       ${x.percent_share}%
     show if: beneficiaries.number_gathered() > 1
   - Edit: x.has_successor
     button: |
-      **Does ${x.name.full(middle='full')} have a successor beneficiary?**
+      **Does ${x.name_full()} have a successor beneficiary?**
       ${word(yesno(x.has_successor))}
   - Edit: x.successor_beneficiary.name.first
     button: |
       **Successor beneficiary's name:**
-      ${x.successor_beneficiary.name.full(middle='full')}
+      ${x.successor_beneficiary.name_full()}
     show if: x.has_successor == True
   - Edit: x.successor_beneficiary.address.city
     button: |
-      **${x.successor_beneficiary.name.full(middle='full')}'s location:**
+      **${x.successor_beneficiary.name_full()}'s location:**
       % if x.successor_beneficiary.in_america == True:
       ${x.successor_beneficiary.address.city}, ${x.successor_beneficiary.address.state}
       % else:
@@ -2088,13 +2088,13 @@ review:
       - recompute:
         - x.successor_beneficiary.relationship_info
     button: |
-      **Who is ${x.successor_beneficiary.name.full(middle='full')} related to?**
+      **Who is ${x.successor_beneficiary.name_full()} related to?**
       % if x.successor_beneficiary.related_to_who == "me":
-      ${users[0].name.full(middle='full')}
+      ${users[0].name_full()}
       % elif x.successor_beneficiary.related_to_who == "joint owner":
-      ${joint_owner.name.full(middle='full')}
+      ${joint_owner.name_full()}
       % elif x.successor_beneficiary.related_to_who == "both":
-      Both ${users[0].name.full(middle='full')} and ${joint_owner.name.full(middle='full')}
+      Both ${users[0].name_full()} and ${joint_owner.name_full()}
       % endif
     show if: joint_language == True and x.has_successor == True
   - label: Edit 
@@ -2104,7 +2104,7 @@ review:
         - x.successor_beneficiary.relationship
         - x.successor_beneficiary.relationship_info
     button: |
-      **${x.successor_beneficiary.name.full(middle='full')}'s relationship to you:**
+      **${x.successor_beneficiary.name_full()}'s relationship to you:**
       ${x.successor_beneficiary.relationship}
     show if: x.successor_beneficiary.show_successor_relationship
   - label: Edit
@@ -2114,7 +2114,7 @@ review:
         - x.successor_beneficiary.joint_relationship
         - x.successor_beneficiary.relationship_info
     button: |
-      **${x.successor_beneficiary.name.full(middle='full')}'s relationship to ${joint_owner.name.full(middle='full')}:**
+      **${x.successor_beneficiary.name_full()}'s relationship to ${joint_owner.name_full()}:**
       ${x.successor_beneficiary.joint_relationship}
     show if: joint_language == True and x.successor_beneficiary.related_to_who != "me" and x.has_successor == True
 ---
