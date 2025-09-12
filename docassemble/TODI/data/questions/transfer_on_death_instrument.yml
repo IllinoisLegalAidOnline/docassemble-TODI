@@ -1368,9 +1368,17 @@ subquestion: |
   You will need to have two witnesses sign the TODI with you in front of a notary public. You don't need to know who your witnesses will be right now, but you will need to add their names and addresses later.
   
   Your beneficiaries cannot serve as witnesses.
+
+  ${collapse_template(finding_witnesses)}
 fields:
   - no label: first_witness_known
     datatype: yesnoradio
+---
+template: finding_witnesses
+subject: |
+  **How can I find a witness?**
+content: | 
+  Family members, neighbors, friends, acquaintances, members of a religious or social group, and social workers all could serve as a witness.
 ---
 id: second witness known
 question: |
@@ -1382,6 +1390,8 @@ subquestion: |
   % else:
   Your beneficiaries cannot serve as witnesses.
   % endif
+
+  ${collapse_template(finding_witnesses)}
 fields:
   - no label: second_witness_known
     datatype: yesnoradio
