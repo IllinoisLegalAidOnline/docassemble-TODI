@@ -1275,7 +1275,7 @@ question: |
   How do you want to split the property between your beneficiaries?
 field: even_split
 choices:
-  - "An equal amount (${thousands((100 / beneficiaries.number_gathered()), show_decimals = True)}%) for each person" : True
+  - "An equal amount (1/${beneficiaries.number_gathered()} or ${thousands((100 / beneficiaries.number_gathered()), show_decimals = True)}%) for each person" : True
   - "Different amounts for each person" : False  
 #fields:
   #- no label: even_split
@@ -1691,6 +1691,11 @@ review:
       **Beneficiaries' tenancy:**
         ${tenancy_type}
     show if: beneficiaries.number_gathered() > 1
+  - Edit: even_split
+    button: |
+     **Will the beneficiaries split the property evenly?**
+     ${word(yesno(even_split))}
+    show if: beneficiaries.number_gathered() > 1 and tenancy_type == "Tenants in common"
   - Edit: first_witness_known
     button: |
       **Do you know who will be the first witness?**
@@ -1869,6 +1874,11 @@ review:
       **Beneficiaries' tenancy:**
         ${tenancy_type}
     show if: beneficiaries.number_gathered() > 1
+  - Edit: even_split
+    button: |
+     **Will the beneficiaries split the property evenly?**
+     ${word(yesno(even_split))}
+    show if: beneficiaries.number_gathered() > 1 and tenancy_type == "Tenants in common"
 ---
 section: Property
 id: property review screen
@@ -2081,7 +2091,16 @@ review:
       % else:
       1/${beneficiaries.number_gathered()}
       % endif
-    show if: beneficiaries.number_gathered() > 1
+    show if: beneficiaries.number_gathered() > 1 and tenancy_type == "Tenants in common" and not even_split
+  - Edit: even_split
+    button: |
+      **${ x.name_full() }'s share of the property:**
+      % if percentage_short_enough(x.percent_share) == True:
+      ${x.percent_share}%
+      % else:
+      1/${beneficiaries.number_gathered()}
+      % endif
+    show if: beneficiaries.number_gathered() > 1 and tenancy_type == "Tenants in common" and even_split
   - Edit: x.has_successor
     button: |
       **Does ${x.name_full()} have a successor beneficiary?**
