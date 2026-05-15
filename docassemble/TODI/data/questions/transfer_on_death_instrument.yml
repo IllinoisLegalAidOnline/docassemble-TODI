@@ -242,7 +242,9 @@ subquestion: |
 
   This program helps you prepare a Transfer On Death Instrument (TODI) for your property located in Illinois. 
   
-  A TODI lets you to transfer real estate to your loved ones without including it in your will. This means your loved ones can avoid having to go to court to divide up your property after your death. To learn more, read ILAO's article about [**common questions about Transfer on Death Instruments**](https://www.illinoislegalaid.org/legal-information/transfer-death-instrument-common-questions).
+  A TODI lets you transfer real estate to your loved ones without including it in your will. This means your loved ones can avoid having to go to court to divide up your property after your death. 
+  
+  In Illinois, a Transfer on Death Instrument can only be used for real property. This includes land, houses, commercial properties, and farmland. To learn more, read ILAO's article, [**Transfer on Death Instrument common questions**](https://www.illinoislegalaid.org/legal-information/transfer-death-instrument-common-questions).
   
   The form you create can only be used in Illinois.
   
@@ -439,6 +441,8 @@ subquestion: |
 id: property address
 question: |
   What is the address of the property you want to include in the TODI?
+subquestion: |
+  ${collapse_template(not_residential)}
 fields:
   - Street address: todi_property.address
     address autocomplete: True
@@ -450,6 +454,16 @@ fields:
       states_list() 
   - ZIP code: todi_property.zip
   - County: todi_property.county
+---
+template: not_residential
+subject: |
+  **About non-residential properties**
+content: |
+  Residential property is real estate used as living spaces. If your property is a store, an office, or another place not used as a home, it is non-residential property.
+  
+  You can use a TODI to transfer non-residential property. However, transferring non-residential property can be complex. You may run into obstacles with taxes, business succession, or other issues.
+
+  You may want to talk to a lawyer before making a TODI for a non-residential property. If you would like help finding free or low-cost legal services in your area, use [**Get Legal Help**](https://www.illinoislegalaid.org/get-legal-help).
 ---
 id: property pin
 question: |
