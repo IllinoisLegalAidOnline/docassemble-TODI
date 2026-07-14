@@ -96,6 +96,33 @@ code: |
   nav.set_section('section_beneficiaries')
   set_progress(60)
   beneficiaries.gather()
+  for person in beneficiaries:
+    if person.has_successor:
+      person.successor_beneficiary.name.first
+      person.successor_beneficiary.address.city
+      if joint_language:
+        if person.successor_beneficiary.related_to_who == "me" or person.successor_beneficiary.related_to_who == "both":
+          person.successor_beneficiary.relationship
+        if person.successor_beneficiary.related_to_who == "joint owner" or person.successor_beneficiary.related_to_who == "both":
+          person.successor_beneficiary.joint_relationship
+      else:
+        person.successor_beneficiary.relationship
+      person.successor_beneficiary.relationship_info
+    elif joint_language == False:
+      if person.relationship == "Child":
+        person.child_notice
+    else:
+      if person.related_to_who == "me":
+        if person.relationship == "Child":
+          person.child_notice
+      elif person.related_to_who == "joint owner":
+        if person.joint_relationship == "Child":
+          person.child_notice
+      elif person.related_to_who == "both":
+        if person.relationship == "Child" or person.joint_relationship == "Child":
+          person.child_notice  
+    person.logic_for_successor_button
+    
   set_progress(80)
   if beneficiaries.number_gathered() == 0:
     no_beneficiaries
@@ -791,33 +818,20 @@ code: |
       beneficiaries[i].joint_relationship
   else:
     beneficiaries[i].relationship
-  if beneficiaries[i].has_successor == True:
-    beneficiaries[i].successor_beneficiary.name.first
-    beneficiaries[i].successor_beneficiary.address.city
-    if joint_language == True:
-      if beneficiaries[i].successor_beneficiary.related_to_who == "me" or beneficiaries[i].successor_beneficiary.related_to_who == "both":
-        beneficiaries[i].successor_beneficiary.relationship
-      if beneficiaries[i].successor_beneficiary.related_to_who == "joint owner" or beneficiaries[i].successor_beneficiary.related_to_who == "both":
-        beneficiaries[i].successor_beneficiary.joint_relationship
-    else:
-      beneficiaries[i].successor_beneficiary.relationship
-    beneficiaries[i].successor_beneficiary.relationship_info
-  elif joint_language == False:
-    if beneficiaries[i].relationship == "Child":
-      beneficiaries[i].child_notice
-  else:
-    if beneficiaries[i].related_to_who == "me":
-      if beneficiaries[i].relationship == "Child":
-        beneficiaries[i].child_notice
-    elif beneficiaries[i].related_to_who == "joint owner":
-      if beneficiaries[i].joint_relationship == "Child":
-        beneficiaries[i].child_notice
-    elif beneficiaries[i].related_to_who == "both":
-      if beneficiaries[i].relationship == "Child" or beneficiaries[i].joint_relationship == "Child":
-        beneficiaries[i].child_notice  
+  #if joint_language == False:
+  #  if beneficiaries[i].relationship == "Child":
+  #    beneficiaries[i].child_notice
+  #else:
+  #  if beneficiaries[i].related_to_who == "me":
+  #    if beneficiaries[i].relationship == "Child":
+  #      beneficiaries[i].child_notice
+  #  elif beneficiaries[i].related_to_who == "joint owner":
+  #    if beneficiaries[i].joint_relationship == "Child":
+  #      beneficiaries[i].child_notice
+  #  elif beneficiaries[i].related_to_who == "both":
+  #    if beneficiaries[i].relationship == "Child" or beneficiaries[i].joint_relationship == "Child":
+  #      beneficiaries[i].child_notice  
   beneficiaries[i].relationship_info
-  #beneficiaries[i].successor_beneficiary.show_successor_relationship
-  beneficiaries[i].logic_for_successor_button
   beneficiaries[i].complete = True 
 ---
 sets:
@@ -828,10 +842,14 @@ question: |
 subquestion: |
   % if i == 0:
   % if joint_language == False:
-  A beneficiary is the person you want to get your property or a share of your property after you pass away.
+  A beneficiary is a person you want to get your property or a share of your property after you pass away.
   % else:
-  A beneficiary is the person you want to get your property or a share of your property after you and ${joint_owner.name_full()} pass away.
+  A beneficiary is a person you want to get your property or a share of your property after you and ${joint_owner.name_full()} pass away.
   % endif
+
+  You will be able to name more than one beneficiary. If you have multiple beneficiaries, they will each get a share of the property. 
+
+  You can also name a successor for each beneficiary. A successor is someone who will get the beneficiary's share of the property if the beneficiary dies before you do.
   % endif
   ${collapse_template(living_trust_info)}
 
@@ -1077,6 +1095,7 @@ question: |
 subquestion: |
   % if joint_language == False:
   If you do not name a successor beneficiary and ${beneficiaries[i].name_full()} passes away before you do, their share of your home will go to their heirs.
+
   % else:
   If you do not name a successor beneficiary and ${beneficiaries[i].name_full()} passes away before you or ${joint_owner.name_full()} do, their share in your home will go to their heirs.
   % endif
