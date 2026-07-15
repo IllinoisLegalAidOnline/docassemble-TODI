@@ -1210,6 +1210,8 @@ sets:
 id: tenancy type
 question: |
   Would you like your beneficiaries to be **joint tenants** or **tenants in common**?
+subquestion: |
+  ${collapse_template(tenancy_type_help)}
 field: tenancy_type
 choices:
   - Joint tenants: Joint tenants
@@ -1218,6 +1220,17 @@ choices:
   - Tenants in common: Tenants in common
     help: |
       **Tenants in common** may have equal or unequal shares. For example, one owner could own an 80% share of the property and another owner could own a 20% share of the property. These percentages must add up to 100%. Tenant-in-common owners do not have the right of survivorship. If a tenant in common passes away, their share of the property goes to their estate instead of the remaining tenants in common.
+---
+template: tenancy_type_help
+subject: |
+  **Learn more about joint tenants and tenants in common**
+content: |
+  A joint tenancy and a tenancy in common are two different ways people can own a property together.
+  
+  **Joint tenant** owners all own an equal share of the property. For example, if there are three joint tenant owners, each owner owns 1/3rd of the property. Joint tenant owners also have what the law calls a "right of survivorship." This means that when a joint tenant owner passes away, their share of the property goes to the other joint tenant owners.  
+
+  **Tenants in common** may have equal or unequal shares. For example, one owner could own an 80% share of the property and another owner could own a 20% share of the property. These percentages must add up to 100%. Tenant-in-common owners do not have the right of survivorship. If a tenant in common passes away, their share of the property goes to their estate instead of the remaining tenants in common.
+  
 ---
 id: tenancy alt intro
 continue button field: alt_tenancy_intro
