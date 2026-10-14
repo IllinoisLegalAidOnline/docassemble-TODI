@@ -1104,7 +1104,7 @@ continue button field: probate_warning
 question: |
   Note about probate
 subquestion: |
-  If you do not name a successor beneficiary and ${beneficiaries[0].name_full()} passes away before you, your home would go through your estate. This would require your heirs to go through probate court. 
+  If you do not name a successor beneficiary and ${beneficiaries[0].name_full()} dies before you, your TODI will not do anything once you die. Instead, your property would go through your estate. This would require your heirs to go through probate court. 
 ---
 sets:
   - first_pass
