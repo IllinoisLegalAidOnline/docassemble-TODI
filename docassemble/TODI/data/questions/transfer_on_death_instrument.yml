@@ -23,7 +23,6 @@ objects:
   - beneficiaries[i].successor_beneficiary: ALIndividual
   - joint_owner: ALIndividual
   - witnesses: ALPeopleList.using(there_are_any=True)
-  - court_list: ALCourtLoader.using(file_name='docassemble.ILAO:data/sources/il_courts.xlsx')
   - test_intl_address: ALAddress
 ---
 code: |
@@ -58,7 +57,6 @@ code: |
   nav.set_section('section_user')
   users[0].name.first
   users[0].address.address
-  users[0].address.county_correct
   set_progress(20)
   if users[0].include_phone == True:
     users[0].phone_number
@@ -74,7 +72,6 @@ code: |
         joint_todi_info
         joint_owner.name.first
         joint_owner.address.address
-        joint_owner.address.county_correct
         if joint_owner.include_phone == True:
           joint_owner.phone_number
         if joint_owner.include_email == True:
@@ -88,7 +85,6 @@ code: |
       common_explanation
       user_common_share
   todi_property.address
-  todi_property.county_correct
   todi_property.pin
   set_progress(40)
   todi_property.description
@@ -271,7 +267,7 @@ subquestion: |
   
   A TODI lets you transfer real estate to your loved ones without including it in your will. This means your loved ones can avoid having to go to court to divide up your property after your death. 
   
-  In Illinois, a Transfer on Death Instrument can only be used for real property. This includes land, houses, commercial properties, and farmland. To learn more, read ILAO's article, [**Transfer on Death Instrument common questions**](https://www.illinoislegalaid.org/legal-information/transfer-death-instrument-common-questions).
+  In Illinois, a Transfer on Death Instrument can only be used for real property. This includes land, houses, commercial properties, and farmland. To learn more, see ILAO's [**Transfer on Death Instrument FAQ**](https://www.illinoislegalaid.org/node/185961).
   
   The form you create can only be used in Illinois.
   
@@ -332,7 +328,7 @@ subquestion: |
 
   ${collapse_template(bonus_info)}
 
-  To learn more, read ILAO's article about [**creating a Transfer on Death Instrument**](https://www.illinoislegalaid.org/legal-information/creating-transfer-death-instrument-todi).
+  To learn more, see ILAO's article on [**creating a Transfer on Death Instrument**](https://www.illinoislegalaid.org/node/89771).
 ---
 template: bonus_info
 subject: |
@@ -446,11 +442,11 @@ question: |
 subquestion: |
   If your spouse outlives you they may be able to stop your TODI, even if you have been separated for a long time. If they stop the TODI, your spouse will receive a share of the property. 
   
-  To learn more, read ILAO's articles about:
+  To learn more, see ILAO's articles:
   
-  * [**What happens when I die without a will?**](https://www.illinoislegalaid.org/legal-information/what-happens-when-i-die-without-will/)
-  * [**Transfer on Death Instrument basics**](https://www.illinoislegalaid.org/legal-information/giving-someone-your-house-when-you-die)
-  * [**A will as a legal document to explain my wishes after I die**](https://www.illinoislegalaid.org/legal-information/will-legal-document-explain-my-wishes-after-i-die)
+  * [**Transfer on Death Instrument basics**](https://www.illinoislegalaid.org/node/89781)
+  * [**Transfer on Death Instrument FAQ**](https://www.illinoislegalaid.org/node/185961)
+  * [**Wills for estate planning FAQ**](https://www.illinoislegalaid.org/node/189176)
 ---
 id: joint married note
 continue button field: joint_married_note
@@ -459,11 +455,11 @@ question: |
 subquestion: |
   If ${joint_owner.name_full()}'s spouse outlives them their spouse may be able to stop the TODI, even if they have been separated for a long time. If they stop the TODI, they will receive a share of the property.
   
-  To learn more, read ILAO's articles about:
+  To learn more, see ILAO's articles:
   
-  * [**What happens when I die without a will?**](https://www.illinoislegalaid.org/legal-information/what-happens-when-i-die-without-will/)
-  * [**Transfer on Death Instrument basics*](https://www.illinoislegalaid.org/legal-information/giving-someone-your-house-when-you-die)
-  * [**A will as a legal document to explain my wishes after I die**](https://www.illinoislegalaid.org/legal-information/will-legal-document-explain-my-wishes-after-i-die)
+  * [**Transfer on Death Instrument basics**](https://www.illinoislegalaid.org/node/89781)
+  * [**Transfer on Death Instrument FAQ**](https://www.illinoislegalaid.org/node/185961)
+  * [**Wills for estate planning FAQ**](https://www.illinoislegalaid.org/node/189176)
 ---
 id: property address
 question: |
@@ -1104,7 +1100,12 @@ continue button field: probate_warning
 question: |
   Note about probate
 subquestion: |
-  If you do not name a successor beneficiary and ${beneficiaries[0].name_full()} passes away before you, your home would go through your estate. This would require your heirs to go through probate court. 
+  If you do not name a successor beneficiary and ${beneficiaries[0].name_full()} dies before you, your TODI will not do anything once you die. Instead, your property would just be part of your estate. That means your heirs will have to go through **{probate}** out who gets the property.
+
+  To learn more about what happens when a beneficiary dies before a property owner, see ILAO's [**Transfer on Death Instrument FAQ**](https://www.illinoislegalaid.org/legal-information/transfer-death-instrument-common-questions#whathappensifthetransferondeathinstrumentbeneficiarydiesbeforethepropertyowner).
+terms:
+  - probate: |
+      **Probate** is a court process where a person's property is given out after they die.
 ---
 sets:
   - first_pass
@@ -1274,7 +1275,7 @@ code: |
     nested_share_code
   else:
     if joint_language == False:
-      if beneficiaries[0].relationship != "Child":
+      if beneficiaries[0].relationship != "Child" and beneficiaries[0].relationship != "Grandchild":
         if beneficiaries[0].has_successor == False:
           probate_warning
   share_calculator = True
@@ -1604,11 +1605,7 @@ review:
     button: |
       **Your name:**
       ${users[0].name_full()}
-  - label: Edit
-    fields:
-      - users[0].address.address
-      - recompute:
-        - users[0].address.county_correct
+  - Edit: users[0].address.address
     button: |
       **Your address:**
       ${users[0].address.on_one_line(bare=True)}, ${end_in_county(users[0].address.county)}
@@ -1634,11 +1631,7 @@ review:
     button: |
       **Your marital status:**
       ${users[0].marital_status}
-  - label: Edit
-    fields:
-      - todi_property.address
-      - recompute:
-        - todi_property.county_correct
+  - Edit: todi_property.address
     button: |
       **Address of the property:**
       ${todi_property.on_one_line(bare=True)}, ${end_in_county(todi_property.county)}
@@ -1686,11 +1679,7 @@ review:
       % endif
       ${joint_owner.name_full()}
     show if: joint_todi_check
-  - label: Edit
-    fields:
-      - joint_owner.address.address
-      - recompute:
-        - joint_owner.address.county_correct
+  - Edit: joint_owner.address.address
     button: |
       **${joint_owner.full(middle='full')}'s address:**
       ${joint_owner.address.on_one_line(bare=True)}, ${end_in_county(joint_owner.address.county)}
@@ -1812,11 +1801,7 @@ review:
     button: |
       **Your name:**
       ${users[0].name_full()}
-  - label: Edit
-    fields:
-      - users[0].address.address
-      - recompute:
-        - users[0].address.county_correct
+  - Edit: users[0].address.address
     button: |
       **Your address:**
       ${users[0].address.on_one_line(bare=True)}, ${end_in_county(users[0].address.county)}
@@ -1860,11 +1845,7 @@ review:
       % endif
       ${joint_owner.name_full()}
     show if: joint_todi_check
-  - label: Edit
-    fields:
-      - joint_owner.address.address
-      - recompute:
-        - joint_owner.address.county_correct
+  - Edit: joint_owner.address.address
     button: |
       **${joint_owner.name_full()}'s address:**
       ${joint_owner.address.on_one_line(bare=True)}, ${end_in_county(joint_owner.address.county)}
@@ -1933,11 +1914,7 @@ question: |
 subquestion: |
   Edit your answers below.
 review:
-  - label: Edit
-    fields:
-      - todi_property.address
-      - recompute:
-        - todi_property.county_correct
+  - Edit: todi_property.address
     button: |
       **Address of the property:**
       ${todi_property.on_one_line(bare=True)}, ${end_in_county(todi_property.county)}
@@ -1985,11 +1962,7 @@ review:
       % endif
       ${joint_owner.name_full()}
     show if: joint_todi_check
-  - label: Edit
-    fields:
-      - joint_owner.address.address
-      - recompute:
-        - joint_owner.address.county_correct
+  - Edit: joint_owner.address.address
     button: |
       **${joint_owner.name_full()}'s address:**
       ${joint_owner.address.on_one_line(bare=True)}, ${end_in_county(joint_owner.address.county)}
