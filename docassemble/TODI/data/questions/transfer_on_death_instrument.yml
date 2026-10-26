@@ -1100,9 +1100,11 @@ continue button field: probate_warning
 question: |
   Note about probate
 subquestion: |
-  If you do not name a successor beneficiary and ${beneficiaries[0].name_full()} dies before you, your TODI will not do anything once you die. Instead, your property would just be part of your estate. That means your heirs will have to go through **{probate}** out who gets the property.
+  If you do not name a successor beneficiary and ${beneficiaries[0].name_full()} dies before you, your TODI will not do anything once you die. Instead, your property would just be part of your estate. That means your heirs will have to go through **{probate}** to figure out who gets the property.
 
-  To learn more about what happens when a beneficiary dies before a property owner, see ILAO's [**Transfer on Death Instrument FAQ**](https://www.illinoislegalaid.org/legal-information/transfer-death-instrument-common-questions#whathappensifthetransferondeathinstrumentbeneficiarydiesbeforethepropertyowner).
+  To learn more about what happens when a beneficiary dies before a property owner, see ILAO's [**Transfer on Death Instrument FAQ**](https://www.illinoislegalaid.org/legal-information/transfer-death-instrument-common-questions#whathappensifthetransferondeathinstrumentbeneficiarydiesbeforethepropertyowner). 
+  
+  To learn more about the probate process, see ILAO's [**Settling an estate after someone dies FAQ**](https://www.illinoislegalaid.org/node/32916).
 terms:
   - probate: |
       **Probate** is a court process where a person's property is given out after they die.
