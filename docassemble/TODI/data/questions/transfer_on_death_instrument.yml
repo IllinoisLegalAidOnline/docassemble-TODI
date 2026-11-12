@@ -512,8 +512,6 @@ question: |
   What county is the property in?
 subquestion: |
   We could not find the county for ${ todi_property.on_one_line(bare=True) } in the list of Illinois counties, but you can select it here.
-
-  ${ collapse_template(county_lookup_help) }
 fields:
   - County: corrected_county
     code: |
