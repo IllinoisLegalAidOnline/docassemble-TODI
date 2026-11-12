@@ -85,6 +85,7 @@ code: |
       common_explanation
       user_common_share
   todi_property.address
+  todi_property.confirm_county
   todi_property.pin
   set_progress(40)
   todi_property.description
@@ -488,6 +489,36 @@ content: |
   
   You may want to talk to a lawyer before making a TODI for a non-residential property. If you would like help finding free or low-cost legal services in your area, use [**Get Legal Help**](https://www.illinoislegalaid.org/get-legal-help).
 ---
+generic object: ALAddress
+code: |  
+  if x.state == "IL":
+    found_county_yet = False
+    for entry in il_county_list:
+      if x.county.lower().endswith(" county"):
+        if x.county.lower()[0:-7] == entry.lower():
+          found_county_yet = True
+      else:
+        if x.county.lower() == entry.lower():
+          found_county_yet = True
+    if not found_county_yet:
+      corrected_county
+      x.county = corrected_county
+  x.confirm_county = True
+---
+depends on:
+  - todi_property.county
+id: county dropdown
+question: |
+  What county is the property in?
+subquestion: |
+  We could not find the county for ${ todi_property.on_one_line(bare=True) } in the list of Illinois counties, but you can select it here.
+
+  ${ collapse_template(county_lookup_help) }
+fields:
+  - County: corrected_county
+    code: |
+      il_county_list
+---
 id: property pin
 question: |
   What is the Property Index Number ("PIN") for this property? 
@@ -516,7 +547,7 @@ subject: |
 content: |
   If a property has two PINs but only one legal description, you may want to list both PINs in your answer. If the property has multiple PINs and multiple legal descriptions, you may need to make separate TODIs.
   
-  When making a TODI, you should refer to the property the same way your deed refers to the property. If you do not know how you should refer to the property, you may want to [**Get Legal Help**]("https://www.illinoislegalaid.org/get-legal-help").
+  When making a TODI, you should refer to the property the same way your deed refers to the property. If you do not know how you should refer to the property, you may want to [**Get Legal Help**](https://www.illinoislegalaid.org/get-legal-help).
 ---
 id: property description
 question: |
@@ -584,7 +615,7 @@ id: shared owners type
 question: |
   What type of ownership do you have?
 subquestion: |
-  There are a few different ways multiple people can own a property. Your deed or conveyance document may have this informaton.
+  There are a few different ways multiple people can own a property. Your deed or conveyance document may have this information.
 field: shared_owners_type
 choices:
   code: |
@@ -595,13 +626,13 @@ continue button field: common_explanation
 question: |
   Tenancy in common
 subquestion: |
-  As you are a **tenant in common**, you and the other owners could make a TODI together. However, this program does not make a shared TODI for **tenants in common**. If you would like to make a TODI with your co-owners, you may want to [**Get Legal Help**]("https://www.illinoislegalaid.org/get-legal-help").
+  As you are a **tenant in common**, you and the other owners could make a TODI together. However, this program does not make a shared TODI for **tenants in common**. If you would like to make a TODI with your co-owners, you may want to [**Get Legal Help**](https://www.illinoislegalaid.org/get-legal-help).
   
   If you continue using this program, your TODI will transfer your share of the property and only your share of the property to your beneficiaries.
 ---
-id: user commmon share
+id: user common share
 question: |
-  What pecentage of the property do you own?
+  What percentage of the property do you own?
 subquestion: |
   As a tenant in common, you own a specific percent share of the property.
 fields:
@@ -628,15 +659,15 @@ subquestion: |
   
   If you file a TODI on your own and you are not the last owner to pass away your TODI will not take effect.
   
-  This program can make a joint TODI for a property with two owners: you and your joint owner. It cannot make a joint TODI for a property with three or more owners. If the property is owned by three or more people, you may file separate TODIs or [**Get Legal Help**]("https://www.illinoislegalaid.org/get-legal-help").
+  This program can make a joint TODI for a property with two owners: you and your joint owner. It cannot make a joint TODI for a property with three or more owners. If the property is owned by three or more people, you may file separate TODIs or [**Get Legal Help**](https://www.illinoislegalaid.org/get-legal-help).
   % elif shared_owners_type == "Tenancy by the entirety":
-  As you and your spouse are **tenants in the entirety**, you could file a TODI together if you both agree who should get the home after you both pass away.
+  As you and your spouse are **tenants by the entirety**, you could file a TODI together if you both agree who should get the home after you both pass away.
   
   If you and your spouse file a TODI together and your spouse outlives you, they could decide to revoke the TODI.
   
   If you and your spouse do not agree about who would get the home after you both pass away, you can each file your own TODIs. Only the TODI of the owner who passes away last would take effect.
   
-  If you have more questions or concerns, you may want to [**Get Legal Help**]("https://www.illinoislegalaid.org/get-legal-help").
+  If you have more questions or concerns, you may want to [**Get Legal Help**](https://www.illinoislegalaid.org/get-legal-help).
   % endif
 field: joint_todi_check
 choices:
@@ -655,7 +686,7 @@ subquestion: |
   
   You will both need to sign the TODI in the presence of witnesses.
   
-  If you have questions or concerns, you may want to [**Get Legal Help**]("https://www.illinoislegalaid.org/get-legal-help").
+  If you have questions or concerns, you may want to [**Get Legal Help**](https://www.illinoislegalaid.org/get-legal-help).
   % elif shared_owners_type == "Joint Tenancy":
   If you and the other owner make a TODI together, you must agree on the answers to all of the questions in this interview. If you do not agree, do not make a shared TODI.
   
@@ -663,7 +694,7 @@ subquestion: |
   
   You will both need to sign the TODI in the presence of witnesses.
   
-  If you have questions or concerns, you may want to [**Get Legal Help**]("https://www.illinoislegalaid.org/get-legal-help").
+  If you have questions or concerns, you may want to [**Get Legal Help**](https://www.illinoislegalaid.org/get-legal-help).
   % else:
   Logic error. There is likely an issue with either the shared_owners_type variable or this question block.
   % endif
@@ -672,9 +703,9 @@ subquestion: |
 id: tenant entirety explanation
 continue button field: entirety_explanation
 question: |
-  Tenancy in the entirety
+  Tenancy by the entirety
 subquestion: |
-  As you and your spouse are **tenants in the entirety**, you could file a TODI together if you both agree who should get the home after you both pass away. However, this program can only make a TODI for a single owner.
+  As you and your spouse are **tenants by the entirety**, you could file a TODI together if you both agree who should get the home after you both pass away. However, this program can only make a TODI for a single owner.
 
   If you and your spouse do not agree about who would get the home after you both pass away, you can each file your own TODIs. Only the TODI of the owner who passes away last would take effect.
 ---
@@ -683,7 +714,7 @@ event: unknown_kickout
 question: |
   Sorry
 subquestion: |
-  You should not use this program if you do not know what type of shared ownership you have. Your deed or conveyance document may have this information. If your deed does not say, **tenancy in common** is the default. However, you may want to [**Get Legal Help**]("https://www.illinoislegalaid.org/get-legal-help") 
+  You should not use this program if you do not know what type of shared ownership you have. Your deed or conveyance document may have this information. If your deed does not say, **tenancy in common** is the default. However, you may want to [**Get Legal Help**](https://www.illinoislegalaid.org/get-legal-help).
 buttons:
   - Exit: exit
   - Restart: restart
@@ -705,7 +736,7 @@ fields:
     required: False
   - Suffix: joint_owner.name.suffix
     help: |
-      Some names have a suffix after the last name, such as "Senior," "III," or "Jr." If your name does not have a suffix, you can leave this blank.
+      Some names have a suffix after the last name, such as "Senior," "III," or "Jr." If their name does not have a suffix, you can leave this blank.
     code: |
       name_suffix()
     required: False
@@ -775,7 +806,7 @@ choices:
   - Married
   - Legally separated by a judge: Legally separated by a judge
     help: |
-      A legal separation is a court-ordered arrangement for a married couple to live separately and separate their assets. If ${joint_owner.name_full()} lives apart from their spouse but were not separated by a judge, they are still considered married.
+      A legal separation is a court-ordered arrangement for a married couple to live separately and separate their assets. If ${joint_owner.name_full()} lives apart from their spouse but they were not separated by a judge, they are still considered married.
   - Divorced
   - Widowed
 ---
@@ -997,8 +1028,14 @@ depends on:
   - beneficiaries[i].relationship
   - beneficiaries[i].related_to_who
   - beneficiaries[i].joint_relationship
-  - users[0].name
-  - joint_owner.name
+  - users[0].name.first
+  - users[0].name.middle
+  - users[0].name.last
+  - users[0].name.suffix
+  - joint_owner.name.first
+  - joint_owner.name.middle
+  - joint_owner.name.last
+  - joint_owner.name.suffix
 code: |
   if joint_language == False:
     beneficiaries[i].relationship_info = beneficiaries[i].relationship
@@ -1118,7 +1155,7 @@ code: |
 ---
 sets:
   - beneficiaries[i].successor_beneficiary.name.first
-id: names of beneficiaries
+id: names of successors
 question: |
   What is the name of the successor beneficiary for ${beneficiaries[i].name_full()}?
 subquestion: |
@@ -1364,7 +1401,7 @@ code: |
   if beneficiary_count  == 1:
     beneficiaries[0].percent_share = 100
   else:
-    undefine(beneficiaries[0].percent_share)  
+    undefine('beneficiaries[0].percent_share')  
   percent_default = True
 ---
 id: running total calculate
@@ -1398,7 +1435,7 @@ subquestion: |
   
   If you would like to edit the percentages, click **Back** to go back or click **Beneficiaries** to edit your answers.
 ---
-#This kickout exists for when there is a percentage is but the ownership cannot be converted to a joint tenancy.
+#This kickout exists for when there is a percentage but the ownership cannot be converted to a joint tenancy.
 id: percent kickout
 event: percent_kickout
 question: |
@@ -1512,9 +1549,9 @@ question: |
 subquestion: |
   After you download your TODI, you will need to:
   
-    1. Sign and date it in front of 2 witnesses and a notary public,
-    2. Record the TODI with your county's Recorder of Deeds, and
-    3. Give copies to your beneficiaries.
+  1. Sign and date it in front of 2 witnesses and a notary public,
+  2. Record the TODI with your county's Recorder of Deeds, and
+  3. Give copies to your beneficiaries.
   
   You may need to bring multiple copies of the TODI to the Recorder of Deeds. You may also need to pay a fee.
   
@@ -1577,8 +1614,8 @@ content: |
   [**Illinois Legal Aid Online**](https://www.illinoislegalaid.org)
 ---
 objects:
-  - al_user_bundle: ALDocumentBundle.using(elements=[instructions, todi], filename="transfer_on_death_instrument.pdf", title="All forms", enabled=True)
-  - al_court_bundle: ALDocumentBundle.using(elements=[intsructions, todi], filename="transfer_on_death_instrument", title="All forms", enabled=True)
+  - al_user_bundle: ALDocumentBundle.using(elements=[instructions, todi, notice], filename="transfer_on_death_instrument", title="All forms", enabled=True)
+  - al_court_bundle: ALDocumentBundle.using(elements=[instructions, todi, notice], filename="transfer_on_death_instrument", title="All forms", enabled=True)
 ---
 attachment:
   - name: todi
@@ -1587,14 +1624,21 @@ attachment:
     docx template file: todi_docassemble.docx
 ---
 attachment:
+  - name: notice
+    variable name: notice[i]
+    filename: notice_of_death_affidavit
+    docx template file: todi_notice_of_death.docx
+---
+attachment:
   - name: instructions
     variable name: instructions[i]
     filename: instructions
     docx template file: todi_instructions.docx
 ---
 objects:
-  - todi: ALDocument.using(title="TODI and Affidavit", filename="todi", enabled=True, has_addendum=False)
+  - todi: ALDocument.using(title="Transfer on Death Instrument", filename="todi", enabled=True, has_addendum=False)
   - instructions: ALDocument.using(title="Instructions", filename="instructions", enabled=True, has_addendum=False)
+  - notice: ALDocument.using(title="Notice of Death Affidavit", filename="notice", enabled=True, has_addendum=False)
 ---
 id: review screen
 event: review_answers
@@ -1633,7 +1677,11 @@ review:
     button: |
       **Your marital status:**
       ${users[0].marital_status}
-  - Edit: todi_property.address
+  - label: Edit
+    fields:
+      - todi_property.address
+      - recompute:
+          - todi_property.confirm_county
     button: |
       **Address of the property:**
       ${todi_property.on_one_line(bare=True)}, ${end_in_county(todi_property.county)}
@@ -1771,7 +1819,7 @@ review:
       ${witnesses[1].address.on_one_line(bare=True)}
     show if: second_witness_known == True and second_witness_address_known == True
 ---
-id: beneficiaries review screen
+id: beneficiaries table review screen
 continue button field: beneficiaries.revisit
 question: |
   Edit the information about the beneficiaries
@@ -1916,7 +1964,11 @@ question: |
 subquestion: |
   Edit your answers below.
 review:
-  - Edit: todi_property.address
+  - label: Edit
+    fields:
+      - todi_property.address
+      - recompute:
+          - todi_property.confirm_county
     button: |
       **Address of the property:**
       ${todi_property.on_one_line(bare=True)}, ${end_in_county(todi_property.county)}
@@ -2175,7 +2227,7 @@ review:
       ${x.successor_beneficiary.joint_relationship}
     show if: joint_language == True and x.successor_beneficiary.related_to_who != "me" and x.has_successor == True
 ---
-#This code block exists slowly to determine whether the successor beneficiary user relationship button is shown in the review screen. There is probably a more efficient way to do this, but sometimes I am a fool.
+#This code block exists solely to determine whether the successor beneficiary user relationship button is shown in the review screen. There is probably a more efficient way to do this, but sometimes I am a fool.
 sets:
   - beneficiaries[i].logic_for_successor_button
 depends on:
